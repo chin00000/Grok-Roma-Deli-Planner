@@ -61,6 +61,7 @@ export interface StartupItem {
   url: string;
   unit: UnitId;
   excludeFromContingency: boolean;
+  final: boolean;
 }
 
 export interface OutgoingCategory {
@@ -78,6 +79,7 @@ export interface OutgoingItem {
   frequency: Frequency;
   notes: string;
   unit: UnitId;
+  final: boolean;
 }
 
 export interface Employee {
