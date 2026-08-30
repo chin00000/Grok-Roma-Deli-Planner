@@ -1,6 +1,6 @@
 import { Plus, Trash2 } from 'lucide-react';
 import { computeModel } from '../calc/model';
-import { money, percent } from '../format';
+import { money, percent, signedClass } from '../format';
 import type { AppState, RevenueStream, UnitId } from '../types';
 import { UNITS, newId } from '../types';
 
@@ -49,7 +49,7 @@ export function Revenue({
           <h1>Revenue</h1>
           <p>
             Cafe, wine bar, catering. Extra units can be added. Labour is linked from the roster by
-            unit. Optimistic volumes are notes only — they do not drive the model.
+            unit.
           </p>
         </div>
         <button type="button" className="btn" onClick={add}>
@@ -123,10 +123,6 @@ export function Revenue({
                     <input type="number" value={s.volume} onChange={(e) => patch(s.id, { volume: Number(e.target.value) })} />
                   </label>
                   <label className="field">
-                    <span>Hours / session</span>
-                    <input type="number" value={s.hoursPerSession} onChange={(e) => patch(s.id, { hoursPerSession: Number(e.target.value) })} />
-                  </label>
-                  <label className="field">
                     <span>AOV</span>
                     <input type="number" value={s.aov} onChange={(e) => patch(s.id, { aov: Number(e.target.value) })} />
                   </label>
@@ -139,10 +135,6 @@ export function Revenue({
               <label className="field">
                 <span>Other variable %</span>
                 <input type="number" step="0.1" value={s.otherVarPct} onChange={(e) => patch(s.id, { otherVarPct: Number(e.target.value) })} />
-              </label>
-              <label className="field">
-                <span>Optimistic volume (note)</span>
-                <input type="number" value={s.optimisticVolume} onChange={(e) => patch(s.id, { optimisticVolume: Number(e.target.value) })} />
               </label>
               <label className="toggle" style={{ alignItems: 'flex-end' }}>
                 <span>Meal formula (d × w × 4)</span>
@@ -162,27 +154,27 @@ export function Revenue({
               <div className="grid grid-4" style={{ marginTop: 14 }}>
                 <div>
                   <div className="muted">Revenue</div>
-                  <div className="kpi" style={{ fontSize: 24 }}>{money(r.revenue)}</div>
+                  <div className={`kpi ${signedClass(r.revenue)}`} style={{ fontSize: 24 }}>{money(r.revenue)}</div>
                 </div>
                 <div>
                   <div className="muted">COGS {percent(s.cogsPct)}</div>
-                  <div className="kpi" style={{ fontSize: 24 }}>{money(r.cogs)}</div>
+                  <div className={`kpi ${signedClass(r.cogs)}`} style={{ fontSize: 24 }}>{money(r.cogs)}</div>
                 </div>
                 <div>
                   <div className="muted">Linked labour</div>
-                  <div className="kpi" style={{ fontSize: 24 }}>{money(r.labour)}</div>
+                  <div className={`kpi ${signedClass(r.labour)}`} style={{ fontSize: 24 }}>{money(r.labour)}</div>
                 </div>
                 <div>
                   <div className="muted">Contribution</div>
-                  <div className="kpi" style={{ fontSize: 24 }}>{money(r.contribution)}</div>
+                  <div className={`kpi ${signedClass(r.contribution)}`} style={{ fontSize: 24 }}>{money(r.contribution)}</div>
                 </div>
                 <div>
                   <div className="muted">Extra fixed (outgoings)</div>
-                  <div className="kpi" style={{ fontSize: 24 }}>{money(r.extraFixed)}</div>
+                  <div className={`kpi ${signedClass(r.extraFixed)}`} style={{ fontSize: 24 }}>{money(r.extraFixed)}</div>
                 </div>
                 <div>
                   <div className="muted">Operating profit</div>
-                  <div className="kpi" style={{ fontSize: 24 }}>{money(r.operatingProfit)}</div>
+                  <div className={`kpi ${signedClass(r.operatingProfit)}`} style={{ fontSize: 24 }}>{money(r.operatingProfit)}</div>
                 </div>
               </div>
             )}
