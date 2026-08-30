@@ -275,6 +275,13 @@ input.cell, select.cell, textarea.cell {
   border-radius: 8px;
 }
 input.cell:hover, select.cell:hover, textarea.cell:hover { background: var(--bg); border-color: var(--line); }
+input.cell:not([type='number']) {
+  width: 12rem;
+  max-width: 100%;
+  height: 32px;
+  box-sizing: border-box;
+  padding: 4px 6px;
+}
 
 .btn {
   border: 1px solid var(--line);
@@ -471,10 +478,6 @@ th.url-col, td.url-cell {
   padding-right: 4px;
   text-align: center;
 }
-th.notes-col, td.notes-cell {
-  width: 36%;
-  min-width: 300px;
-}
 th.exc-col, td.exc-cell {
   width: 54px;
   max-width: 56px;
@@ -520,14 +523,6 @@ td.exc-cell input[type='checkbox'] {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-.notes-cell input.notes-compact,
-.notes-cell textarea.notes-edit {
-  display: block;
-  width: 100%;
-  max-width: none;
-  min-width: 0;
-  box-sizing: border-box;
 }
 .notes-preview {
   position: fixed;
