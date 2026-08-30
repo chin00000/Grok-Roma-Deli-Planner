@@ -450,3 +450,14 @@ label.field > span { font-weight: 600; letter-spacing: 0.04em; text-transform: u
   border-color: var(--sel, var(--olive));
   box-shadow: 0 0 0 1px var(--sel, var(--olive)), var(--shadow-sm);
 }
+
+tr.line-draft td {
+  background: color-mix(in srgb, var(--loss) 26%, var(--paper));
+}
+tr.line-final td {
+  background: color-mix(in srgb, var(--ok) 22%, var(--paper));
+}
+tr.line-draft input.cell,
+tr.line-draft select.cell { background: transparent; }
+tr.line-final input.cell,
+tr.line-final select.cell { background: transparent; }

@@ -31,6 +31,7 @@ export function Outgoings({
       cost: 0,
       frequency: 'monthly',
       notes: '',
+      final: false,
     };
     setState({ ...state, outgoingItems: [...state.outgoingItems, item] });
   }
@@ -40,7 +41,7 @@ export function Outgoings({
       <div className="page-head">
         <div>
           <h1>Outgoings</h1>
-          <p>Recurring costs with weekly / monthly / quarterly / yearly frequency, normalised to monthly and annual.</p>
+          <p>Recurring costs with weekly / monthly / quarterly / yearly frequency, normalised to monthly and annual. Terracotta = still open, green = final.</p>
         </div>
         <div>
           <div className={`kpi ${signedClass(monthly)}`}>{money(monthly)}</div>
@@ -72,12 +73,13 @@ export function Outgoings({
                     <th className="num">Monthly</th>
                     <th className="num">Annual</th>
                     <th>Notes</th>
+                    <th>Final</th>
                     <th />
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((i) => (
-                    <tr key={i.id}>
+                    <tr key={i.id} className={i.final ? 'line-final' : 'line-draft'}>
                       <td>
                         <input className="cell" value={i.name} onChange={(e) => patch(i.id, { name: e.target.value })} />
                       </td>
@@ -108,6 +110,14 @@ export function Outgoings({
                         <input className="cell" value={i.notes} onChange={(e) => patch(i.id, { notes: e.target.value })} />
                       </td>
                       <td>
+                        <input
+                          type="checkbox"
+                          checked={i.final}
+                          onChange={(e) => patch(i.id, { final: e.target.checked })}
+                          aria-label="Final"
+                        />
+                      </td>
+                      <td>
                         <button
                           type="button"
                           className="icon-btn"
@@ -132,7 +142,7 @@ export function Outgoings({
                     <td />
                     <td className={`num ${signedClass(m)}`}>{money(m)}</td>
                     <td className={`num ${signedClass(m * 12)}`}>{money(m * 12)}</td>
-                    <td colSpan={2} />
+                    <td colSpan={3} />
                   </tr>
                 </tfoot>
               </table>

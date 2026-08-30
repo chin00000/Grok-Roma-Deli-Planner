@@ -16,7 +16,11 @@ export function loadState(): AppState {
     ) {
       return seedState();
     }
-    return parsed;
+    return {
+      ...parsed,
+      startupItems: parsed.startupItems.map((i) => ({ ...i, final: !!i.final })),
+      outgoingItems: parsed.outgoingItems.map((i) => ({ ...i, final: !!i.final })),
+    };
   } catch {
     return seedState();
   }
