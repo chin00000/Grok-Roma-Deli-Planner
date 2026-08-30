@@ -35,3 +35,8 @@ export function monthsLabel(m: number | null): string {
   if (mo === 0) return `${y} yr`;
   return `${y} yr ${mo} mo`;
 }
+
+export function signedClass(n: number): string {
+  return Number.isFinite(n) && n < 0 ? 'neg' : '';
+}
+
