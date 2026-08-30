@@ -120,7 +120,7 @@ export async function exportWorkbook(state: AppState): Promise<ArrayBuffer> {
   addSheet(
     wb,
     'Startup',
-    ['id', 'categoryId', 'unit', 'name', 'newPrice', 'usedPrice', 'condition', 'excludeFromContingency', 'supplier', 'url', 'notes', 'calculated'],
+    ['id', 'categoryId', 'unit', 'name', 'newPrice', 'usedPrice', 'condition', 'excludeFromContingency', 'supplier', 'url', 'notes', 'final', 'calculated'],
     state.startupItems.map((i) => [
       i.id,
       i.categoryId,
@@ -133,9 +133,10 @@ export async function exportWorkbook(state: AppState): Promise<ArrayBuffer> {
       i.supplier,
       i.url,
       i.notes,
+      i.final,
       startupItemAmount(i),
     ]),
-    [5, 6, 12],
+    [5, 6, 13],
   );
   const startWs = wb.getWorksheet('Startup')!;
   startWs.addRow([]);
@@ -147,7 +148,7 @@ export async function exportWorkbook(state: AppState): Promise<ArrayBuffer> {
   addSheet(
     wb,
     'Outgoings',
-    ['id', 'categoryId', 'unit', 'name', 'cost', 'frequency', 'monthly', 'annual', 'notes'],
+    ['id', 'categoryId', 'unit', 'name', 'cost', 'frequency', 'monthly', 'annual', 'notes', 'final'],
     state.outgoingItems.map((i) => [
       i.id,
       i.categoryId,
@@ -158,6 +159,7 @@ export async function exportWorkbook(state: AppState): Promise<ArrayBuffer> {
       toMonthly(i.cost, i.frequency),
       toMonthly(i.cost, i.frequency) * 12,
       i.notes,
+      i.final,
     ]),
     [5, 7, 8],
   );
@@ -294,6 +296,15 @@ function bool(row: ExcelJS.Row, col: number): boolean {
   return s === 'true' || s === '1' || s === 'yes';
 }
 
+function headerCol(ws: ExcelJS.Worksheet, name: string): number | undefined {
+  const head = ws.getRow(1);
+  let found: number | undefined;
+  head.eachCell((c, col) => {
+    if (String(c.value ?? '').trim().toLowerCase() === name.toLowerCase()) found = col;
+  });
+  return found;
+}
+
 function pctVal(row: ExcelJS.Row, col: number): number {
   const v = row.getCell(col).value;
   if (typeof v === 'number') return v > 0 && v <= 1.0001 ? v * 100 : v;
@@ -336,6 +347,7 @@ export async function importWorkbook(buffer: ArrayBuffer, current: AppState): Pr
   const startup = wb.getWorksheet('Startup');
   if (startup) {
     const items: StartupItem[] = [];
+    const finalCol = headerCol(startup, 'final');
     startup.eachRow((row, i) => {
       if (i === 1) return;
       const id = cell(row, 1);
@@ -353,6 +365,7 @@ export async function importWorkbook(buffer: ArrayBuffer, current: AppState): Pr
         supplier: cell(row, 9),
         url: cell(row, 10),
         notes: cell(row, 11),
+        final: finalCol ? bool(row, finalCol) : false,
       });
     });
     if (items.length) next.startupItems = items;
@@ -361,6 +374,7 @@ export async function importWorkbook(buffer: ArrayBuffer, current: AppState): Pr
   const outgoings = wb.getWorksheet('Outgoings');
   if (outgoings) {
     const items: OutgoingItem[] = [];
+    const finalCol = headerCol(outgoings, 'final');
     outgoings.eachRow((row, i) => {
       if (i === 1) return;
       const id = cell(row, 1);
@@ -373,6 +387,7 @@ export async function importWorkbook(buffer: ArrayBuffer, current: AppState): Pr
         cost: num(row, 5),
         frequency: (cell(row, 6) as Frequency) || 'monthly',
         notes: cell(row, 9) || cell(row, 7),
+        final: finalCol ? bool(row, finalCol) : false,
       });
     });
     if (items.length) next.outgoingItems = items;
