@@ -1,6 +1,6 @@
 import { Plus, Trash2 } from 'lucide-react';
 import { toAnnual, toMonthly } from '../calc/frequency';
-import { money } from '../format';
+import { money, signedClass } from '../format';
 import type { AppState, Frequency, OutgoingItem, UnitId } from '../types';
 import { FREQUENCIES, UNITS, newId } from '../types';
 
@@ -43,8 +43,8 @@ export function Outgoings({
           <p>Recurring costs with weekly / monthly / quarterly / yearly frequency, normalised to monthly and annual.</p>
         </div>
         <div>
-          <div className="kpi">{money(monthly)}</div>
-          <div className="kpi-sub">Monthly · {money(monthly * 12)} / yr</div>
+          <div className={`kpi ${signedClass(monthly)}`}>{money(monthly)}</div>
+          <div className="kpi-sub">Monthly · <span className={signedClass(monthly * 12)}>{money(monthly * 12)}</span> / yr</div>
         </div>
       </div>
 
@@ -102,8 +102,8 @@ export function Outgoings({
                           ))}
                         </select>
                       </td>
-                      <td className="num">{money(toMonthly(i.cost, i.frequency), true)}</td>
-                      <td className="num">{money(toAnnual(i.cost, i.frequency), true)}</td>
+                      <td className={`num ${signedClass(toMonthly(i.cost, i.frequency))}`}>{money(toMonthly(i.cost, i.frequency), true)}</td>
+                      <td className={`num ${signedClass(toAnnual(i.cost, i.frequency))}`}>{money(toAnnual(i.cost, i.frequency), true)}</td>
                       <td>
                         <input className="cell" value={i.notes} onChange={(e) => patch(i.id, { notes: e.target.value })} />
                       </td>
@@ -130,8 +130,8 @@ export function Outgoings({
                     <td>Category</td>
                     <td />
                     <td />
-                    <td className="num">{money(m)}</td>
-                    <td className="num">{money(m * 12)}</td>
+                    <td className={`num ${signedClass(m)}`}>{money(m)}</td>
+                    <td className={`num ${signedClass(m * 12)}`}>{money(m * 12)}</td>
                     <td colSpan={2} />
                   </tr>
                 </tfoot>
