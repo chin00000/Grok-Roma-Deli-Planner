@@ -35,6 +35,7 @@ export function Startup({
       supplier: '',
       url: '',
       excludeFromContingency: false,
+      final: false,
     };
     setState({ ...state, startupItems: [...state.startupItems, item] });
   }
@@ -61,7 +62,8 @@ export function Startup({
             One-off costs by unit. Each item has a new price and an optional used price; the New |
             Used toggle chooses which amount feeds totals. Used with a blank used price counts as $0
             (it does not fall back to new). Contingency is a % of the selected amounts, excluding
-            flagged working capital / wine stock / liquor.
+            flagged working capital / wine stock / liquor. Terracotta rows still need
+            digging; green rows are final.
           </p>
         </div>
         <div className={`kpi ${signedClass(grand)}`}>{money(grand)}</div>
@@ -104,6 +106,7 @@ export function Startup({
                     <th>URL</th>
                     <th>Notes</th>
                     <th>Excl. contig.</th>
+                    <th>Final</th>
                     <th />
                   </tr>
                 </thead>
@@ -111,7 +114,7 @@ export function Startup({
                   {items.map((i) => {
                     const missing = isUsedPriceMissing(i);
                     return (
-                      <tr key={i.id}>
+                      <tr key={i.id} className={i.final ? 'line-final' : 'line-draft'}>
                         <td>
                           <input className="cell" value={i.name} onChange={(e) => patchItem(i.id, { name: e.target.value })} />
                           {missing && (
@@ -174,6 +177,14 @@ export function Startup({
                           />
                         </td>
                         <td>
+                          <input
+                            type="checkbox"
+                            checked={i.final}
+                            onChange={(e) => patchItem(i.id, { final: e.target.checked })}
+                            aria-label="Final"
+                          />
+                        </td>
+                        <td>
                           <button type="button" className="icon-btn" aria-label="Delete" onClick={() => remove(i.id)}>
                             <Trash2 size={14} />
                           </button>
@@ -188,7 +199,7 @@ export function Startup({
                     <td className={`num ${signedClass(roll?.items ?? 0)}`} colSpan={2}>
                       {money(roll?.items ?? 0)}
                     </td>
-                    <td colSpan={6} className="muted">
+                    <td colSpan={7} className="muted">
                       Selected new/used amounts
                     </td>
                   </tr>
@@ -199,7 +210,7 @@ export function Startup({
                     <td className={`num ${signedClass(roll?.contingency ?? 0)}`} colSpan={2}>
                       {money(roll?.contingency ?? 0)}
                     </td>
-                    <td colSpan={6} className="muted">
+                    <td colSpan={7} className="muted">
                       Rounded to nearest dollar
                     </td>
                   </tr>
@@ -208,7 +219,7 @@ export function Startup({
                     <td className={`num ${signedClass(roll?.total ?? 0)}`} colSpan={2}>
                       {money(roll?.total ?? 0)}
                     </td>
-                    <td colSpan={6} />
+                    <td colSpan={7} />
                   </tr>
                 </tfoot>
               </table>
