@@ -1,4 +1,4 @@
-import { money } from '../format';
+import { money, signedClass } from '../format';
 
 const PALETTE = ['#5f6e3d', '#c4a574', '#8c7a62', '#3f6b4a', '#9a6b2f'];
 
@@ -25,7 +25,7 @@ export function StackBar({
         {parts.map((p, i) => (
           <span key={p.label}>
             <i className="swatch" style={{ background: p.color ?? PALETTE[i % PALETTE.length] }} />
-            {p.label} · {money(p.value)}
+            {p.label} · <span className={signedClass(p.value)}>{money(p.value)}</span>
           </span>
         ))}
       </div>
@@ -77,7 +77,7 @@ export function Donut({
         {parts.map((p, i) => (
           <span key={p.label}>
             <i className="swatch" style={{ background: p.color ?? PALETTE[i % PALETTE.length] }} />
-            {p.label} · {money(p.value)}
+            {p.label} · <span className={signedClass(p.value)}>{money(p.value)}</span>
           </span>
         ))}
       </div>
