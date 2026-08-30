@@ -3,7 +3,7 @@ import { computeModel } from '../calc/model';
 import { applySharePreset, PRESET_70_30, PRESET_50_50 } from '../calc/partners';
 import type { Amortisation } from '../calc/loan';
 import { Donut, LineChart, PayoffChart } from '../components/Charts';
-import { money, monthsLabel } from '../format';
+import { money, monthsLabel, signedClass } from '../format';
 import type { AppState, Compounding, Partner } from '../types';
 
 const PARTNER_COLORS = ['#5f6e3d', '#c4a574'];
@@ -137,7 +137,7 @@ export function Payback({
               <option value="yearly">Yearly</option>
             </select>
           </label>
-          <div className="muted">Startup after persisted unit toggles: {money(model.startupTotal)}</div>
+          <div className="muted">Startup after persisted unit toggles: <span className={signedClass(model.startupTotal)}>{money(model.startupTotal)}</span></div>
         </div>
       </div>
 
@@ -195,7 +195,7 @@ export function Payback({
               <div className="grid grid-2" style={{ marginTop: 14 }}>
                 <div>
                   <div className="muted">Startup share</div>
-                  <div className="kpi" style={{ fontSize: 26 }}>{money(p.startupShare)}</div>
+                  <div className={`kpi ${signedClass(p.startupShare)}`} style={{ fontSize: 26 }}>{money(p.startupShare)}</div>
                 </div>
                 <div>
                   <div className="muted">Time to clear</div>
@@ -203,7 +203,7 @@ export function Payback({
                 </div>
                 <div>
                   <div className="muted">Total interest</div>
-                  <div className="kpi" style={{ fontSize: 22 }}>{money(p.amort.totalInterest)}</div>
+                  <div className={`kpi ${signedClass(p.amort.totalInterest)}`} style={{ fontSize: 22 }}>{money(p.amort.totalInterest)}</div>
                 </div>
                 <div>
                   <div className="muted">Cash after debt</div>
@@ -213,11 +213,11 @@ export function Payback({
                 </div>
                 <div>
                   <div className="muted">After debt + drawings</div>
-                  <div className="kpi" style={{ fontSize: 22 }}>{money(p.cashAfterDebtAndDrawings)}</div>
+                  <div className={`kpi ${signedClass(p.cashAfterDebtAndDrawings)}`} style={{ fontSize: 22 }}>{money(p.cashAfterDebtAndDrawings)}</div>
                 </div>
                 <div>
                   <div className="muted">Profit share / mo</div>
-                  <div className="kpi" style={{ fontSize: 22 }}>{money(p.profitShare)}</div>
+                  <div className={`kpi ${signedClass(p.profitShare)}`} style={{ fontSize: 22 }}>{money(p.profitShare)}</div>
                 </div>
               </div>
               {raw.id === 'p-a' && raw.monthlyRepayment === 0 && (
@@ -258,11 +258,11 @@ export function Payback({
               </div>
               <div>
                 <div className="muted">Remaining</div>
-                <div className="kpi" style={{ fontSize: 22 }}>{money(charts.mix.remaining)}</div>
+                <div className={`kpi ${signedClass(charts.mix.remaining)}`} style={{ fontSize: 22 }}>{money(charts.mix.remaining)}</div>
               </div>
               <div>
                 <div className="muted">Total interest</div>
-                <div className="kpi" style={{ fontSize: 22 }}>{money(selected.amort.totalInterest)}</div>
+                <div className={`kpi ${signedClass(selected.amort.totalInterest)}`} style={{ fontSize: 22 }}>{money(selected.amort.totalInterest)}</div>
               </div>
               <div>
                 <div className="muted">Cash after debt</div>
