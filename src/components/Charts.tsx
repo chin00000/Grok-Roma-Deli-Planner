@@ -85,15 +85,17 @@ export function Donut({
   );
 }
 
-export function PayoffChart({
+export function LineChart({
   series,
   colors,
+  ariaLabel = 'Line chart',
 }: {
-  series: { name: string; points: { month: number; closing: number }[] }[];
+  series: { name: string; points: { month: number; value: number }[] }[];
   colors: string[];
+  ariaLabel?: string;
 }) {
-  const maxM = Math.max(12, ...series.map((s) => s.points.length - 1), 1);
-  const maxY = Math.max(1, ...series.flatMap((s) => s.points.map((p) => p.closing)));
+  const maxM = Math.max(12, ...series.map((s) => Math.max(0, s.points.length - 1)), 1);
+  const maxY = Math.max(1, ...series.flatMap((s) => s.points.map((p) => p.value)));
   const w = 640;
   const h = 200;
   const pad = { l: 44, r: 12, t: 12, b: 24 };
@@ -101,11 +103,11 @@ export function PayoffChart({
   const ih = h - pad.t - pad.b;
   const x = (m: number) => pad.l + (m / maxM) * iw;
   const y = (v: number) => pad.t + (1 - v / maxY) * ih;
-  const path = (pts: { month: number; closing: number }[]) =>
-    pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${x(p.month)},${y(p.closing)}`).join(' ');
+  const path = (pts: { month: number; value: number }[]) =>
+    pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${x(p.month)},${y(p.value)}`).join(' ');
 
   return (
-    <svg className="pay-chart" viewBox={`0 0 ${w} ${h}`} role="img" aria-label="Debt payoff">
+    <svg className="pay-chart" viewBox={`0 0 ${w} ${h}`} role="img" aria-label={ariaLabel}>
       {[0, 0.5, 1].map((t) => (
         <g key={t}>
           <line
@@ -121,9 +123,11 @@ export function PayoffChart({
           </text>
         </g>
       ))}
-      {series.map((s, i) => (
-        <path key={s.name} d={path(s.points.slice(0, maxM + 1))} fill="none" stroke={colors[i]} strokeWidth="2.4" />
-      ))}
+      {series.map((s, i) =>
+        s.points.length ? (
+          <path key={s.name} d={path(s.points.slice(0, maxM + 1))} fill="none" stroke={colors[i]} strokeWidth="2.4" />
+        ) : null,
+      )}
       <text x={pad.l} y={h - 6} fontSize="10" fill="currentColor" opacity="0.6">
         Month 0
       </text>
@@ -131,5 +135,24 @@ export function PayoffChart({
         Month {maxM}
       </text>
     </svg>
+  );
+}
+
+export function PayoffChart({
+  series,
+  colors,
+}: {
+  series: { name: string; points: { month: number; closing: number }[] }[];
+  colors: string[];
+}) {
+  return (
+    <LineChart
+      series={series.map((s) => ({
+        name: s.name,
+        points: s.points.map((p) => ({ month: p.month, value: p.closing })),
+      }))}
+      colors={colors}
+      ariaLabel="Debt payoff"
+    />
   );
 }

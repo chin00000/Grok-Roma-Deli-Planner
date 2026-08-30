@@ -403,3 +403,36 @@ label.field > span { font-weight: 600; letter-spacing: 0.04em; text-transform: u
   margin-top: 2px;
   font-weight: 500;
 }
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: -4px 0 18px;
+}
+.toggle-row > .muted {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.seg-lg button {
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  padding: 7px 14px;
+  font-family: var(--serif);
+}
+.seg-lg button.on {
+  background: var(--olive);
+  color: var(--paper);
+}
+.seg-lg button.on.tone-b {
+  background: var(--tan);
+  color: var(--ink);
+}
+.card.selected {
+  border-color: var(--sel, var(--olive));
+  box-shadow: 0 0 0 1px var(--sel, var(--olive)), var(--shadow-sm);
+}
