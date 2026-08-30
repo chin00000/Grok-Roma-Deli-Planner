@@ -521,6 +521,14 @@ td.exc-cell input[type='checkbox'] {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.notes-cell input.notes-compact,
+.notes-cell textarea.notes-edit {
+  display: block;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  box-sizing: border-box;
+}
 .notes-preview {
   position: fixed;
   z-index: 42;
