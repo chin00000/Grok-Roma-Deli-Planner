@@ -300,7 +300,6 @@ export function Startup({
                           ) : (
                             <input
                               className="cell notes-compact"
-                              type="text"
                               value={i.notes}
                               onChange={(e) => patchItem(i.id, { notes: e.target.value })}
                               onFocus={() => expandNotes(i.id)}
