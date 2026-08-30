@@ -68,11 +68,11 @@ export function Outgoings({
                 <thead>
                   <tr>
                     <th>Item</th>
-                    <th className="num">Cost</th>
+                    <th className="out-cost num">Cost</th>
                     <th>Frequency</th>
                     <th className="num">Monthly</th>
                     <th className="num">Annual</th>
-                    <th>Notes</th>
+                    <th className="out-notes">Notes</th>
                     <th>Final</th>
                     <th />
                   </tr>
@@ -83,10 +83,12 @@ export function Outgoings({
                       <td>
                         <input className="cell" value={i.name} onChange={(e) => patch(i.id, { name: e.target.value })} />
                       </td>
-                      <td className="num">
+                      <td className="out-cost num">
                         <input
-                          className="cell"
+                          className="cell out-cost-input"
                           type="number"
+                          inputMode="numeric"
+                          aria-label="Cost"
                           value={i.cost}
                           onChange={(e) => patch(i.id, { cost: Number(e.target.value) })}
                         />
@@ -106,8 +108,8 @@ export function Outgoings({
                       </td>
                       <td className={`num ${signedClass(toMonthly(i.cost, i.frequency))}`}>{money(toMonthly(i.cost, i.frequency), true)}</td>
                       <td className={`num ${signedClass(toAnnual(i.cost, i.frequency))}`}>{money(toAnnual(i.cost, i.frequency), true)}</td>
-                      <td>
-                        <input className="cell" value={i.notes} onChange={(e) => patch(i.id, { notes: e.target.value })} />
+                      <td className="out-notes">
+                        <input className="cell out-notes-input" type="text" value={i.notes} onChange={(e) => patch(i.id, { notes: e.target.value })} />
                       </td>
                       <td>
                         <input
@@ -138,7 +140,7 @@ export function Outgoings({
                 <tfoot>
                   <tr>
                     <td>Category</td>
-                    <td />
+                    <td className="out-cost num" />
                     <td />
                     <td className={`num ${signedClass(m)}`}>{money(m)}</td>
                     <td className={`num ${signedClass(m * 12)}`}>{money(m * 12)}</td>

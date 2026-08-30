@@ -575,3 +575,40 @@ td input[type='checkbox']:disabled {
   opacity: 0.65;
   cursor: not-allowed;
 }
+
+/* Cost: six-digit lock, no spinner, header over the number */
+th.out-cost, td.out-cost {
+  width: 12ch;
+  max-width: 13ch;
+  text-align: right;
+  white-space: nowrap;
+}
+input.out-cost-input {
+  display: inline-block;
+  width: 7ch;
+  max-width: 7ch;
+  box-sizing: content-box;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+.out-cost-input::-webkit-outer-spin-button,
+.out-cost-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+/* Notes: takes leftover width, shrinks on narrow screens */
+th.out-notes, td.out-notes {
+  width: 100%;
+  min-width: 6rem;
+}
+.out-notes-input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  box-sizing: border-box;
+}
