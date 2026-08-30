@@ -194,7 +194,7 @@ export function Startup({
                     <th className="num">New price</th>
                     <th className="num">Used price</th>
                     <th>Condition</th>
-                    <th>Supplier</th>
+                    <th className="supplier-col">Supplier</th>
                     <th className="url-col">URL</th>
                     <th className="notes-col">Notes</th>
                     <th
@@ -266,8 +266,8 @@ export function Startup({
                             ))}
                           </div>
                         </td>
-                        <td>
-                          <input className="cell" value={i.supplier} onChange={(e) => patchItem(i.id, { supplier: e.target.value })} />
+                        <td className="supplier-cell">
+                          <input className="cell supplier-input" value={i.supplier} onChange={(e) => patchItem(i.id, { supplier: e.target.value })} />
                         </td>
                         <td className="url-cell">
                           <button

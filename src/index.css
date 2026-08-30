@@ -275,8 +275,8 @@ input.cell, select.cell, textarea.cell {
   border-radius: 8px;
 }
 input.cell:hover, select.cell:hover, textarea.cell:hover { background: var(--bg); border-color: var(--line); }
-input.cell:not([type='number']) {
-  width: 12rem;
+input.cell.supplier-input {
+  width: 8rem;
   max-width: 100%;
   height: 32px;
   box-sizing: border-box;
@@ -519,7 +519,14 @@ td.exc-cell input[type='checkbox'] {
   width: 100%;
   margin: 0;
 }
+th.notes-col, td.notes-cell { width: 36%; min-width: 260px; }
 .notes-cell input.notes-compact {
+  display: block;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  height: 32px;
+  box-sizing: border-box;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
