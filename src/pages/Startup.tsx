@@ -1,7 +1,7 @@
 import { Plus, Trash2 } from 'lucide-react';
 import { startupByCategory } from '../calc/model';
 import { isUsedPriceMissing } from '../calc/startup';
-import { money } from '../format';
+import { money, signedClass } from '../format';
 import type { AppState, ItemCondition, StartupItem, UnitId } from '../types';
 import { UNITS, newId } from '../types';
 
@@ -64,7 +64,7 @@ export function Startup({
             flagged working capital / wine stock / liquor.
           </p>
         </div>
-        <div className="kpi">{money(grand)}</div>
+        <div className={`kpi ${signedClass(grand)}`}>{money(grand)}</div>
       </div>
 
       {state.startupCategories.map((cat) => {
@@ -185,7 +185,7 @@ export function Startup({
                 <tfoot>
                   <tr>
                     <td>Items</td>
-                    <td className="num" colSpan={2}>
+                    <td className={`num ${signedClass(roll?.items ?? 0)}`} colSpan={2}>
                       {money(roll?.items ?? 0)}
                     </td>
                     <td colSpan={6} className="muted">
@@ -194,9 +194,9 @@ export function Startup({
                   </tr>
                   <tr>
                     <td>
-                      Contingency {cat.contingencyPct}% of {money(roll?.contingencyBase ?? 0)}
+                      Contingency {cat.contingencyPct}% of <span className={signedClass(roll?.contingencyBase ?? 0)}>{money(roll?.contingencyBase ?? 0)}</span>
                     </td>
-                    <td className="num" colSpan={2}>
+                    <td className={`num ${signedClass(roll?.contingency ?? 0)}`} colSpan={2}>
                       {money(roll?.contingency ?? 0)}
                     </td>
                     <td colSpan={6} className="muted">
@@ -205,7 +205,7 @@ export function Startup({
                   </tr>
                   <tr>
                     <td>Unit total</td>
-                    <td className="num" colSpan={2}>
+                    <td className={`num ${signedClass(roll?.total ?? 0)}`} colSpan={2}>
                       {money(roll?.total ?? 0)}
                     </td>
                     <td colSpan={6} />

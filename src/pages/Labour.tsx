@@ -1,6 +1,6 @@
 import { Plus, Trash2 } from 'lucide-react';
 import { labourTotals } from '../calc/labour';
-import { money } from '../format';
+import { money, signedClass } from '../format';
 import type { AppState, DayPart, Employee, EmploymentType, Weekday } from '../types';
 import { DAYS, DAY_PARTS, newId } from '../types';
 
@@ -93,8 +93,8 @@ export function Labour({
           </p>
         </div>
         <div>
-          <div className="kpi">{money(totals.monthly)}</div>
-          <div className="kpi-sub">Fully loaded / month · {money(totals.weekly)} / week</div>
+          <div className={`kpi ${signedClass(totals.monthly)}`}>{money(totals.monthly)}</div>
+          <div className="kpi-sub">Fully loaded / month · <span className={signedClass(totals.weekly)}>{money(totals.weekly)}</span> / week</div>
         </div>
       </div>
 
@@ -206,7 +206,7 @@ export function Labour({
                         aria-label="WorkCover applies"
                       />
                     </td>
-                    <td className="num">{money(cost?.monthlyLoaded ?? 0)}</td>
+                    <td className={`num ${signedClass(cost?.monthlyLoaded ?? 0)}`}>{money(cost?.monthlyLoaded ?? 0)}</td>
                     <td>
                       <button
                         type="button"
@@ -327,18 +327,18 @@ export function Labour({
             <tbody>
               <tr>
                 <td>Cafe</td>
-                <td className="num">{money(totals.byUnitMonthly.cafe / state.assumptions.weeksPerMonthLabour)}</td>
-                <td className="num">{money(totals.byUnitMonthly.cafe)}</td>
+                <td className={`num ${signedClass(totals.byUnitMonthly.cafe / state.assumptions.weeksPerMonthLabour)}`}>{money(totals.byUnitMonthly.cafe / state.assumptions.weeksPerMonthLabour)}</td>
+                <td className={`num ${signedClass(totals.byUnitMonthly.cafe)}`}>{money(totals.byUnitMonthly.cafe)}</td>
               </tr>
               <tr>
                 <td>Wine bar</td>
-                <td className="num">{money(totals.byUnitMonthly.wine / state.assumptions.weeksPerMonthLabour)}</td>
-                <td className="num">{money(totals.byUnitMonthly.wine)}</td>
+                <td className={`num ${signedClass(totals.byUnitMonthly.wine / state.assumptions.weeksPerMonthLabour)}`}>{money(totals.byUnitMonthly.wine / state.assumptions.weeksPerMonthLabour)}</td>
+                <td className={`num ${signedClass(totals.byUnitMonthly.wine)}`}>{money(totals.byUnitMonthly.wine)}</td>
               </tr>
               <tr>
                 <td>Catering</td>
-                <td className="num">{money(totals.byUnitMonthly.catering / state.assumptions.weeksPerMonthLabour)}</td>
-                <td className="num">{money(totals.byUnitMonthly.catering)}</td>
+                <td className={`num ${signedClass(totals.byUnitMonthly.catering / state.assumptions.weeksPerMonthLabour)}`}>{money(totals.byUnitMonthly.catering / state.assumptions.weeksPerMonthLabour)}</td>
+                <td className={`num ${signedClass(totals.byUnitMonthly.catering)}`}>{money(totals.byUnitMonthly.catering)}</td>
               </tr>
             </tbody>
           </table>

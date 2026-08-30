@@ -33,6 +33,25 @@ export default function App() {
   }, [state]);
 
   useEffect(() => {
+    function tint(el: EventTarget | null) {
+      if (!(el instanceof HTMLInputElement)) return;
+      if ((el.type || '').toLowerCase() !== 'number') return;
+      const n = Number(el.value);
+      el.classList.toggle('neg', Number.isFinite(n) && n < 0);
+    }
+
+    function onInput(e: Event) {
+      tint(e.target);
+    }
+
+    document.addEventListener('input', onInput, true);
+    document.querySelectorAll<HTMLInputElement>('input[type=number]').forEach(tint);
+    return () => {
+      document.removeEventListener('input', onInput, true);
+    };
+  }, [state, tab]);
+
+  useEffect(() => {
     let justFocused: HTMLInputElement | null = null;
 
     function onFocusIn(e: FocusEvent) {
