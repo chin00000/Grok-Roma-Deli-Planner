@@ -472,8 +472,20 @@ th.url-col, td.url-cell {
   text-align: center;
 }
 th.notes-col, td.notes-cell {
-  width: 28%;
-  min-width: 220px;
+  width: 36%;
+  min-width: 300px;
+}
+th.exc-col, td.exc-cell {
+  width: 54px;
+  max-width: 56px;
+  padding-left: 4px;
+  padding-right: 4px;
+  text-align: center;
+  white-space: nowrap;
+}
+td.exc-cell input[type='checkbox'] {
+  display: block;
+  margin: 0 auto;
 }
 .url-cell { position: relative; }
 .url-btn {
@@ -534,6 +546,20 @@ textarea.notes-edit {
   min-height: 72px;
   resize: vertical;
   width: 100%;
+}
+.exc-tip {
+  position: fixed;
+  z-index: 42;
+  max-width: 320px;
+  padding: 12px 14px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  line-height: 1.45;
+  pointer-events: none;
 }
 td input[type='checkbox']:disabled {
   opacity: 0.65;
