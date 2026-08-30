@@ -16,8 +16,9 @@ const TABS: { id: TabId; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'labour', label: 'Labour', icon: Users },
   { id: 'revenue', label: 'Revenue', icon: TrendingUp },
   { id: 'payback', label: 'Payback', icon: Scale },
-  { id: 'settings', label: 'Settings', icon: Settings },
 ];
+
+const SETTINGS = { id: 'settings' as const, label: 'Settings', icon: Settings };
 
 export function Nav({ tab, onTab }: { tab: TabId; onTab: (t: TabId) => void }) {
   return (
@@ -44,6 +45,18 @@ export function Nav({ tab, onTab }: { tab: TabId; onTab: (t: TabId) => void }) {
           );
         })}
       </nav>
+      <div className="nav-end">
+        <button
+          type="button"
+          className={`tab${tab === SETTINGS.id ? ' active' : ''}`}
+          aria-label={SETTINGS.label}
+          aria-current={tab === SETTINGS.id ? 'page' : undefined}
+          onClick={() => onTab(SETTINGS.id)}
+        >
+          <SETTINGS.icon size={18} strokeWidth={1.8} />
+          <span className="tip">{SETTINGS.label}</span>
+        </button>
+      </div>
     </header>
   );
 }
