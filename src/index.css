@@ -268,13 +268,13 @@ input:focus, select:focus, textarea:focus {
   border-color: var(--olive);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--olive) 20%, transparent);
 }
-input.cell, select.cell {
+input.cell, select.cell, textarea.cell {
   background: transparent;
   border-color: transparent;
   padding: 4px 6px;
   border-radius: 8px;
 }
-input.cell:hover, select.cell:hover { background: var(--bg); border-color: var(--line); }
+input.cell:hover, select.cell:hover, textarea.cell:hover { background: var(--bg); border-color: var(--line); }
 
 .btn {
   border: 1px solid var(--line);
@@ -458,6 +458,83 @@ tr.line-final td {
   background: color-mix(in srgb, var(--ok) 22%, var(--paper));
 }
 tr.line-draft input.cell,
-tr.line-draft select.cell { background: transparent; }
+tr.line-draft select.cell,
+tr.line-draft textarea.cell { background: transparent; }
 tr.line-final input.cell,
-tr.line-final select.cell { background: transparent; }
+tr.line-final select.cell,
+tr.line-final textarea.cell { background: transparent; }
+
+th.url-col, td.url-cell {
+  width: 44px;
+  max-width: 52px;
+  padding-left: 4px;
+  padding-right: 4px;
+  text-align: center;
+}
+th.notes-col, td.notes-cell {
+  width: 28%;
+  min-width: 220px;
+}
+.url-cell { position: relative; }
+.url-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+}
+.url-btn:hover { background: var(--bg); color: var(--olive); }
+.url-btn.has-url { color: var(--olive); }
+.url-btn.has-url:hover { color: var(--olive-2); background: color-mix(in srgb, var(--olive) 12%, var(--paper)); }
+.url-edit {
+  position: fixed;
+  z-index: 45;
+  width: 280px;
+  padding: 6px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+.url-edit input {
+  width: 100%;
+  margin: 0;
+}
+.notes-cell input.notes-compact {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.notes-preview {
+  position: fixed;
+  z-index: 42;
+  max-width: 360px;
+  max-height: min(280px, 50vh);
+  overflow: auto;
+  padding: 12px 14px;
+  background: var(--paper);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  pointer-events: none;
+}
+.notes-preview.above { transform: translateY(-100%); }
+
+tr.row-open td { vertical-align: top; }
+textarea.notes-edit {
+  min-height: 72px;
+  resize: vertical;
+  width: 100%;
+}
+td input[type='checkbox']:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
