@@ -32,6 +32,7 @@ export function Startup({
     top: number;
     above: boolean;
   } | null>(null);
+  const [excTip, setExcTip] = useState<{ left: number; top: number } | null>(null);
 
   function patchItem(id: string, patch: Partial<StartupItem>) {
     setState({
@@ -130,6 +131,16 @@ export function Startup({
     setHoverNotes(null);
   }
 
+  function onExcEnter(e: MouseEvent<HTMLElement>) {
+    const r = e.currentTarget.getBoundingClientRect();
+    const width = Math.min(320, window.innerWidth - 24);
+    let left = r.left;
+    const top = r.bottom + 8;
+    if (left + width > window.innerWidth - 12) left = window.innerWidth - width - 12;
+    if (left < 12) left = 12;
+    setExcTip({ left, top });
+  }
+
   const editingUrlItem = editingUrlId
     ? state.startupItems.find((x) => x.id === editingUrlId)
     : undefined;
@@ -186,7 +197,13 @@ export function Startup({
                     <th>Supplier</th>
                     <th className="url-col">URL</th>
                     <th className="notes-col">Notes</th>
-                    <th>Excl. contig.</th>
+                    <th
+                      className="exc-col"
+                      onMouseEnter={onExcEnter}
+                      onMouseLeave={() => setExcTip(null)}
+                    >
+                      EXC.CON.
+                    </th>
                     <th>Final</th>
                     <th />
                   </tr>
@@ -290,7 +307,7 @@ export function Startup({
                             />
                           )}
                         </td>
-                        <td>
+                        <td className="exc-cell">
                           <input
                             type="checkbox"
                             checked={i.excludeFromContingency}
@@ -336,7 +353,7 @@ export function Startup({
                   </tr>
                   <tr>
                     <td>
-                      Contingency {cat.contingencyPct}% of <span className={signedClass(roll?.contingencyBase ?? 0)}>{money(roll?.contingencyBase ?? 0)}</span>
+                      {cat.contingencyPct}% Contingency
                     </td>
                     <td className={`num ${signedClass(roll?.contingency ?? 0)}`} colSpan={2}>
                       {money(roll?.contingency ?? 0)}
@@ -395,6 +412,18 @@ export function Startup({
             role="tooltip"
           >
             {hoverNotes.text}
+          </div>,
+          document.body,
+        )}
+
+      {excTip &&
+        createPortal(
+          <div
+            className="exc-tip"
+            style={{ left: excTip.left, top: excTip.top }}
+            role="tooltip"
+          >
+            Exclude from contingency. Ticked lines skip this category's contingency %. Final prices tick this automatically.
           </div>,
           document.body,
         )}
