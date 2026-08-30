@@ -1,5 +1,6 @@
 import type ExcelJS from 'exceljs';
 import { computeModel } from '../calc/model';
+import { startupItemAmount } from '../calc/startup';
 import { toMonthly } from '../calc/frequency';
 import type {
   AppState,
@@ -105,8 +106,8 @@ export async function exportWorkbook(state: AppState): Promise<ArrayBuffer> {
       ['Break-even cafe covers/day', model.breakEvenCafeCoversPerDay ?? 0, 'Assumption: contribution per cover after COGS+var, covering cafe labour+fixed'],
       ['Cash after debt', model.cashAfterDebt, 'Operating profit − both repayments'],
       ['Cash after debt + drawings', model.cashAfterDebtAndDrawings, ''],
-      ['Party A share %', (state.partners[0]?.sharePct ?? 0) / 100, ''],
-      ['Party B share %', (state.partners[1]?.sharePct ?? 0) / 100, ''],
+      [`${state.partners[0]?.name ?? 'Partner A (Small)'} share %`, (state.partners[0]?.sharePct ?? 0) / 100, 'Seed 70% Partner A (Small)'],
+      [`${state.partners[1]?.name ?? 'Partner B (Sudy)'} share %`, (state.partners[1]?.sharePct ?? 0) / 100, 'Seed 30% Partner B (Sudy)'],
     ],
     [2],
   );
@@ -119,11 +120,22 @@ export async function exportWorkbook(state: AppState): Promise<ArrayBuffer> {
   addSheet(
     wb,
     'Startup',
-    ['id', 'categoryId', 'unit', 'name', 'cost', 'excludeFromContingency', 'supplier', 'url', 'notes'],
+    ['id', 'categoryId', 'unit', 'name', 'newPrice', 'usedPrice', 'condition', 'excludeFromContingency', 'supplier', 'url', 'notes', 'calculated'],
     state.startupItems.map((i) => [
-      i.id, i.categoryId, i.unit, i.name, i.cost, i.excludeFromContingency, i.supplier, i.url, i.notes,
+      i.id,
+      i.categoryId,
+      i.unit,
+      i.name,
+      i.newPrice,
+      i.usedPrice,
+      i.condition,
+      i.excludeFromContingency,
+      i.supplier,
+      i.url,
+      i.notes,
+      startupItemAmount(i),
     ]),
-    [5],
+    [5, 6, 12],
   );
   const startWs = wb.getWorksheet('Startup')!;
   startWs.addRow([]);
@@ -197,7 +209,7 @@ export async function exportWorkbook(state: AppState): Promise<ArrayBuffer> {
     model.partners.map((p) => [
       p.id, p.name, p.principal, p.interestPa, p.monthlyRepayment,
       p.amort.monthsToClear, p.amort.totalInterest, state.assumptions.compounding,
-      'Principal defaults to this party’s share of startup unless principalOverride is set on Partners.',
+      'Principal defaults to this partner’s share of startup unless principalOverride is set on Partners.',
     ]),
     [3, 5, 7],
   );
@@ -208,7 +220,9 @@ export async function exportWorkbook(state: AppState): Promise<ArrayBuffer> {
     ['id', 'name', 'sharePct', 'monthlyRepayment', 'interestPa', 'principalOverride', 'notes'],
     state.partners.map((p) => [
       p.id, p.name, p.sharePct / 100, p.monthlyRepayment, p.interestPa, p.principalOverride,
-      p.id === 'p-a' ? 'Seed 30% / $6,000 per month' : 'Seed 70%; repayment left at $0 so it is not invented',
+      p.id === 'p-a'
+        ? 'Seed 70% Partner A (Small); repayment left at $0 so it is not invented'
+        : 'Seed 30% Partner B (Sudy) / $6,000 per month',
     ]),
     [4, 6],
   );
@@ -261,6 +275,16 @@ function num(row: ExcelJS.Row, col: number): number {
   if (typeof v === 'number') return v;
   const n = Number(cell(row, col).replace(/[$,]/g, ''));
   return Number.isFinite(n) ? n : 0;
+}
+
+function numOrNull(row: ExcelJS.Row, col: number): number | null {
+  const v = row.getCell(col).value;
+  if (v === null || v === undefined || v === '') return null;
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  const s = cell(row, col).trim();
+  if (s === '') return null;
+  const n = Number(s.replace(/[$,]/g, ''));
+  return Number.isFinite(n) ? n : null;
 }
 
 function bool(row: ExcelJS.Row, col: number): boolean {
@@ -316,16 +340,19 @@ export async function importWorkbook(buffer: ArrayBuffer, current: AppState): Pr
       if (i === 1) return;
       const id = cell(row, 1);
       if (!id || id === 'CONTINGENCY') return;
+      const condRaw = cell(row, 7).trim().toLowerCase();
       items.push({
         id,
         categoryId: cell(row, 2),
         unit: (cell(row, 3) as UnitId) || 'cafe',
         name: cell(row, 4),
-        cost: num(row, 5),
-        excludeFromContingency: bool(row, 6),
-        supplier: cell(row, 7),
-        url: cell(row, 8),
-        notes: cell(row, 9),
+        newPrice: num(row, 5),
+        usedPrice: numOrNull(row, 6),
+        condition: condRaw === 'used' ? 'used' : 'new',
+        excludeFromContingency: bool(row, 8),
+        supplier: cell(row, 9),
+        url: cell(row, 10),
+        notes: cell(row, 11),
       });
     });
     if (items.length) next.startupItems = items;

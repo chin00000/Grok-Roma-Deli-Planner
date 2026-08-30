@@ -35,6 +35,8 @@ export function Home({
   const model = computeModel(state, preview);
   const a = model.partners[0];
   const b = model.partners[1];
+  const owner1 = state.employees.find((e) => e.isOwner && e.ownerIndex === 1);
+  const owner2 = state.employees.find((e) => e.isOwner && e.ownerIndex === 2);
 
   return (
     <div className="rise">
@@ -72,12 +74,12 @@ export function Home({
             onClick={() => setPreview({ ...preview, cateringOn: !preview.cateringOn })}
           />
           <Switch
-            label="Owner 1 salary"
+            label={`${owner1?.name ?? 'Nikita'} salary`}
             on={preview.includeOwner1Salary}
             onClick={() => setPreview({ ...preview, includeOwner1Salary: !preview.includeOwner1Salary })}
           />
           <Switch
-            label="Owner 2 salary"
+            label={`${owner2?.name ?? 'Maddison'} salary`}
             on={preview.includeOwner2Salary}
             onClick={() => setPreview({ ...preview, includeOwner2Salary: !preview.includeOwner2Salary })}
           />

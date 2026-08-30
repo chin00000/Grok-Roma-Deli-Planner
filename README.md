@@ -22,11 +22,11 @@ npm run build
 Icon-only tabs: Home, Startup, Outgoings, Labour, Revenue, Payback, Settings.
 
 - Home: 10-second whole-business view for both partners. Revenue mix, contribution vs fixed, labour vs sales, cash after debt, payback, partner split. Scenario dropdowns (wine, catering, owner salaries, covers, meals) are preview only and do not write persisted JSON.
-- Startup: categories, AUD items, notes, supplier/URL, unit Cafe|Wine|Catering. Contingency is a percent of the category. Cafe excludes working capital; wine excludes stock and liquor; catering is 10 percent of its items.
+- Startup: categories, AUD items with a new price, an optional used price, and a New | Used toggle per row. The selected price feeds totals / payback / Home. Used with a blank used price counts as $0 (no silent fallback to new). Notes, supplier/URL, unit Cafe|Wine|Catering. Contingency is a percent of the selected amounts. Cafe excludes working capital; wine excludes stock and liquor; catering is 10 percent of its items.
 - Outgoings: cost plus weekly, monthly, quarterly or yearly, normalised to monthly and annual.
-- Labour: up to 5 employees plus 2 owner-operators. Weekly roster by daypart (coffee rush, cafe/deli, catering prep, wine bar). Fully loaded cost by unit.
+- Labour: up to 5 employees plus 2 owner-operators — Partner A Nikita (Small's side) and Partner B Maddison (Sudy's side), both salary not hourly. Weekly roster by daypart (coffee rush, cafe/deli, catering prep, wine bar). Fully loaded cost by unit.
 - Revenue: cafe, wine, catering (add more). Volume, AOV, COGS percent, other variable percent, linked labour, extra fixed, contribution, operating profit.
-- Payback: Party A (Rick) 30 percent / Party B 70 percent, plus a 50/50 preset. Bank loan principal defaults to each party's share of startup. Dual payoff charts. Monthly compounding default.
+- Payback: Partner A (Small) 70 percent / Partner B (Sudy) 30 percent, plus a 50/50 preset. Bank loan principal defaults to each partner's share of startup. Dual payoff charts. Monthly compounding default. Partner B (Sudy) seed repayment is $6,000/mo; Partner A (Small) repayment is $0 until set.
 - Settings: light cream / espresso dark, persisted unit on/off, Excel import/export, reset to seed.
 
 Currency and copy: en-AU / AUD.
@@ -35,7 +35,7 @@ Currency and copy: en-AU / AUD.
 
 Settings, then Export, writes a human spreadsheet (ExcelJS): Dashboard, Startup, Outgoings, Labour, Employees, Revenue, Loans, Partners, Settings.
 
-Sheets are colour-coded, headers frozen, AUD number formats, notes column. Internally the app keeps JSON for speed.
+Sheets are colour-coded, headers frozen, AUD number formats, notes column. Startup has `newPrice`, `usedPrice`, and a `condition` column whose values are the lowercase words `new` or `used`. Internally the app keeps JSON for speed.
 
 Import is destructive. You get a confirm dialog; accepting overwrites the saved local database.
 
@@ -51,7 +51,7 @@ Labelled as assumptions where they are helpers rather than award text pasted int
 - Permanent leave loading: 17.5 percent on 4 weeks ordinary, spread over 52 weeks (assumption)
 - Penalty multipliers: weekday / 7-10pm / Sat / Sun / Sat evening / Sun evening. Editable assumptions, not a full award engine
 - WorkCover: WIC 451113 $1.160 per $100 wages, editable. The $185/mo outgoing is the original standing estimate and may overlap; pick one source of truth
-- Owner drawings: default $0 until you set them. Salary does not multiply by rostered hours; owners still appear for coverage
+- Owner drawings: default $0 until you set them. Partner A operator is Nikita; Partner B operator is Maddison. Salary does not multiply by rostered hours; owners still appear for coverage
 - Labour month: 52/12 weeks. Catering meals still use 15 x 5 x 4 = 300/mo as in the Darwin model
 - Loan compounding: monthly default; yearly available to match the old spreadsheet
 
@@ -59,7 +59,7 @@ Do not treat labour cells as a Fair Work calculator. They are a planning loader 
 
 ## Persistence
 
-Key roma-deli-planner-v1 in localStorage. Home preview state is React state only.
+Key roma-deli-planner-v2 in localStorage (version 2). Older v1 saves with Party A (Rick) are not migrated — reset to the 70/30 Small/Sudy seed. Home preview state is React state only.
 
 ## Stack
 

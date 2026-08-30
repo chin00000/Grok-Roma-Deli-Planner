@@ -47,11 +47,15 @@ export interface StartupCategory {
   sort: number;
 }
 
+export type ItemCondition = 'new' | 'used';
+
 export interface StartupItem {
   id: string;
   categoryId: string;
   name: string;
-  cost: number;
+  newPrice: number;
+  usedPrice: number | null;
+  condition: ItemCondition;
   notes: string;
   supplier: string;
   url: string;

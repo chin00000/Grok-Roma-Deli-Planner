@@ -3,6 +3,7 @@ import { toMonthly } from './frequency';
 import { labourTotals } from './labour';
 import { amortise, type Amortisation } from './loan';
 import { splitStartup } from './partners';
+import { startupItemAmount } from './startup';
 
 export interface UnitFlags {
   cafe: boolean;
@@ -38,10 +39,10 @@ export function startupByCategory(state: AppState, flags: UnitFlags): CategorySt
     .filter((c) => isUnitOn(c.unit, flags))
     .map((c) => {
       const items = state.startupItems.filter((i) => i.categoryId === c.id);
-      const itemsSum = items.reduce((s, i) => s + i.cost, 0);
+      const itemsSum = items.reduce((s, i) => s + startupItemAmount(i), 0);
       const contingencyBase = items
         .filter((i) => !i.excludeFromContingency)
-        .reduce((s, i) => s + i.cost, 0);
+        .reduce((s, i) => s + startupItemAmount(i), 0);
       const contingency = Math.round((contingencyBase * c.contingencyPct) / 100);
       return {
         categoryId: c.id,

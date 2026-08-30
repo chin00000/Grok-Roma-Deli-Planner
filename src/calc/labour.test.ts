@@ -89,7 +89,7 @@ describe('labour fully loaded', () => {
   it('does not multiply owner salary by rostered hours', () => {
     const emp: Employee = {
       id: 'o1',
-      name: 'Rick',
+      name: 'Nikita',
       role: 'Owner',
       isOwner: true,
       ownerIndex: 1,

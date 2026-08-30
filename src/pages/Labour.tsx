@@ -50,7 +50,7 @@ export function Labour({
     const emp: Employee = owner
       ? {
           id: newId('emp'),
-          name: owners.length === 0 ? 'Rick' : 'Partner',
+          name: owners.length === 0 ? 'Nikita' : 'Maddison',
           role: 'Owner-operator',
           isOwner: true,
           ownerIndex: owners.length === 0 ? 1 : 2,
@@ -230,8 +230,9 @@ export function Labour({
           </table>
         </div>
         <p className="notes" style={{ marginTop: 10 }}>
-          Owners appear on the roster for coverage. Salary is monthly drawings and is not multiplied
-          by hours. Default drawings are $0 until you set them.
+          Partner A — Nikita (Small's side). Partner B — Maddison (Sudy's side). Both are salary, not
+          hourly. Owners appear on the roster for coverage. Salary is monthly drawings and is not
+          multiplied by hours. Default drawings are $0 until you set them.
         </p>
       </div>
 

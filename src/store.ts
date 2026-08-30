@@ -1,14 +1,19 @@
 import { seedState } from './seed';
 import type { AppState } from './types';
 
-export const STORAGE_KEY = 'roma-deli-planner-v1';
+export const STORAGE_KEY = 'roma-deli-planner-v2';
 
 export function loadState(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return seedState();
     const parsed = JSON.parse(raw) as AppState;
-    if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.startupItems)) {
+    if (
+      !parsed ||
+      parsed.version !== 2 ||
+      !Array.isArray(parsed.startupItems) ||
+      parsed.startupItems.some((i) => typeof i.newPrice !== 'number' || (i.condition !== 'new' && i.condition !== 'used'))
+    ) {
       return seedState();
     }
     return parsed;

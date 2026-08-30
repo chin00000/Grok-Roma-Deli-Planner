@@ -34,7 +34,7 @@ export function splitStartup(totalStartup: number, partners: Partner[]): SplitRe
   });
 }
 
-export const PRESET_30_70: { a: number; b: number } = { a: 30, b: 70 };
+export const PRESET_70_30: { a: number; b: number } = { a: 70, b: 30 };
 export const PRESET_50_50: { a: number; b: number } = { a: 50, b: 50 };
 
 export function applySharePreset(

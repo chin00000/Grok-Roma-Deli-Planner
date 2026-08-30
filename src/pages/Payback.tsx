@@ -1,5 +1,5 @@
 import { computeModel } from '../calc/model';
-import { applySharePreset, PRESET_30_70, PRESET_50_50 } from '../calc/partners';
+import { applySharePreset, PRESET_70_30, PRESET_50_50 } from '../calc/partners';
 import { PayoffChart } from '../components/Charts';
 import { money, monthsLabel } from '../format';
 import type { AppState, Compounding, Partner } from '../types';
@@ -26,17 +26,18 @@ export function Payback({
         <div>
           <h1>Payback</h1>
           <p>
-            Two parties. Principal defaults to each party’s share of startup. Monthly compounding is
-            the default; yearly is the original spreadsheet style.
+            Two partners. Principal defaults to each partner’s share of startup. Seed is 70/30
+            Partner A (Small) / Partner B (Sudy); 50/50 is a preset. Monthly compounding is the
+            default; yearly is the original spreadsheet style.
           </p>
         </div>
         <div className="row">
           <button
             type="button"
             className="btn"
-            onClick={() => setState({ ...state, partners: applySharePreset(state.partners, PRESET_30_70) })}
+            onClick={() => setState({ ...state, partners: applySharePreset(state.partners, PRESET_70_30) })}
           >
-            30 / 70
+            70 / 30
           </button>
           <button
             type="button"
@@ -70,7 +71,7 @@ export function Payback({
       </div>
 
       <div className="grid grid-2" style={{ marginBottom: 16 }}>
-        {model.partners.map((p, idx) => {
+        {model.partners.map((p) => {
           const raw = state.partners.find((x) => x.id === p.id)!;
           return (
             <div className="card" key={p.id}>
@@ -143,8 +144,10 @@ export function Payback({
                   <div className="kpi" style={{ fontSize: 22 }}>{money(p.profitShare)}</div>
                 </div>
               </div>
-              {idx === 1 && raw.monthlyRepayment === 0 && (
-                <p className="notes">Party B repayment is $0 in the seed — set it; it was not invented.</p>
+              {raw.id === 'p-a' && raw.monthlyRepayment === 0 && (
+                <p className="notes">
+                  Partner A (Small) repayment is $0 in the seed — set it; it was not invented.
+                </p>
               )}
             </div>
           );
