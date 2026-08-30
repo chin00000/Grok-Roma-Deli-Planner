@@ -13,6 +13,7 @@
   --tan-2: #a68555;
   --stone: #b7a890;
   --danger: #8f3b2c;
+  --loss: #c0562a;
   --ok: #3f6b4a;
   --warn: #9a6b2f;
   --shadow: 0 18px 40px rgba(58, 42, 22, 0.08);
@@ -40,6 +41,7 @@
   --tan-2: #e0c8a4;
   --stone: #8c7a62;
   --danger: #e08a78;
+  --loss: #e08a6a;
   --ok: #8fbf9a;
   --warn: #e0b36a;
   --shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
@@ -211,7 +213,12 @@ a { color: var(--olive); }
   margin-top: 10px;
   letter-spacing: -0.03em;
 }
-.kpi.neg { color: var(--danger); }
+.neg,
+.kpi.neg,
+td.num.neg,
+input.neg {
+  color: var(--loss);
+}
 .kpi.pos { color: var(--ok); }
 .kpi-sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
 
