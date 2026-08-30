@@ -11,6 +11,17 @@ import { loadState, saveState } from './store';
 import type { AppState, Preview, TabId } from './types';
 import { defaultPreview } from './types';
 
+function isEntryInput(el: EventTarget | null): el is HTMLInputElement {
+  if (!(el instanceof HTMLInputElement)) return false;
+  if (el.readOnly || el.disabled) return false;
+  const type = (el.type || 'text').toLowerCase();
+  if (type === 'checkbox' || type === 'radio' || type === 'file' || type === 'hidden' || type === 'button') {
+    return false;
+  }
+  if (el.classList.contains('cell')) return true;
+  return type === 'number' || type === 'text' || type === 'search';
+}
+
 export default function App() {
   const [state, setState] = useState<AppState>(() => loadState());
   const [tab, setTab] = useState<TabId>('home');
@@ -20,6 +31,33 @@ export default function App() {
     saveState(state);
     document.documentElement.dataset.theme = state.theme;
   }, [state]);
+
+  useEffect(() => {
+    let justFocused: HTMLInputElement | null = null;
+
+    function onFocusIn(e: FocusEvent) {
+      if (!isEntryInput(e.target)) return;
+      justFocused = e.target;
+      e.target.select();
+    }
+
+    function onMouseUp(e: MouseEvent) {
+      if (!justFocused) return;
+      const input = justFocused;
+      justFocused = null;
+      if (e.target === input) {
+        e.preventDefault();
+        input.select();
+      }
+    }
+
+    document.addEventListener('focusin', onFocusIn);
+    document.addEventListener('mouseup', onMouseUp);
+    return () => {
+      document.removeEventListener('focusin', onFocusIn);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+  }, []);
 
   return (
     <div className="app">
