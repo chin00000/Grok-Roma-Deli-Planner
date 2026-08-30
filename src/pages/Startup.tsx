@@ -1,9 +1,16 @@
-import { Plus, Trash2 } from 'lucide-react';
+import { useState, type MouseEvent } from 'react';
+import { Link2, Plus, Trash2 } from 'lucide-react';
 import { startupByCategory } from '../calc/model';
 import { isUsedPriceMissing } from '../calc/startup';
 import { money, signedClass } from '../format';
 import type { AppState, ItemCondition, StartupItem, UnitId } from '../types';
 import { UNITS, newId } from '../types';
+
+function hrefFor(url: string): string {
+  const raw = url.trim();
+  if (!raw) return '';
+  return /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+}
 
 export function Startup({
   state,
@@ -14,6 +21,16 @@ export function Startup({
 }) {
   const cats = startupByCategory(state, state.units);
   const grand = cats.reduce((s, c) => s + c.total, 0);
+  const [editingUrlId, setEditingUrlId] = useState<string | null>(null);
+  const [urlEditPos, setUrlEditPos] = useState<{ left: number; top: number } | null>(null);
+  const [expandedNotesId, setExpandedNotesId] = useState<string | null>(null);
+  const [hoverNotes, setHoverNotes] = useState<{
+    id: string;
+    text: string;
+    left: number;
+    top: number;
+    above: boolean;
+  } | null>(null);
 
   function patchItem(id: string, patch: Partial<StartupItem>) {
     setState({
@@ -52,6 +69,64 @@ export function Startup({
       ),
     });
   }
+
+  function placePopover(el: HTMLElement, width = 280, height = 44) {
+    const r = el.getBoundingClientRect();
+    let left = r.right + 8;
+    let top = r.top - 4;
+    if (left + width > window.innerWidth - 8) left = Math.max(8, r.left - width - 8);
+    if (top + height > window.innerHeight - 8) top = Math.max(8, window.innerHeight - height - 8);
+    if (top < 8) top = 8;
+    return { left, top };
+  }
+
+  function startEditUrl(el: HTMLElement, id: string) {
+    setEditingUrlId(id);
+    setUrlEditPos(placePopover(el));
+  }
+
+  function onUrlClick(e: MouseEvent<HTMLButtonElement>, item: StartupItem) {
+    e.preventDefault();
+    const raw = item.url.trim();
+    if (!raw) {
+      startEditUrl(e.currentTarget, item.id);
+      return;
+    }
+    window.open(hrefFor(raw), '_blank', 'noopener,noreferrer');
+  }
+
+  function onUrlContext(e: MouseEvent<HTMLButtonElement>, item: StartupItem) {
+    e.preventDefault();
+    startEditUrl(e.currentTarget, item.id);
+  }
+
+  function onNotesEnter(e: MouseEvent<HTMLElement>, item: StartupItem) {
+    if (!item.notes.trim() || expandedNotesId === item.id) {
+      setHoverNotes(null);
+      return;
+    }
+    const r = e.currentTarget.getBoundingClientRect();
+    const width = Math.min(360, window.innerWidth - 24);
+    let left = r.left;
+    let top = r.bottom + 8;
+    let above = false;
+    if (left + width > window.innerWidth - 12) left = window.innerWidth - width - 12;
+    if (left < 12) left = 12;
+    if (r.bottom + 160 > window.innerHeight && r.top > 140) {
+      above = true;
+      top = r.top - 8;
+    }
+    setHoverNotes({ id: item.id, text: item.notes, left, top, above });
+  }
+
+  function expandNotes(id: string) {
+    setExpandedNotesId(id);
+    setHoverNotes(null);
+  }
+
+  const editingUrlItem = editingUrlId
+    ? state.startupItems.find((x) => x.id === editingUrlId)
+    : undefined;
 
   return (
     <div className="rise">
@@ -103,8 +178,8 @@ export function Startup({
                     <th className="num">Used price</th>
                     <th>Condition</th>
                     <th>Supplier</th>
-                    <th>URL</th>
-                    <th>Notes</th>
+                    <th className="url-col">URL</th>
+                    <th className="notes-col">Notes</th>
                     <th>Excl. contig.</th>
                     <th>Final</th>
                     <th />
@@ -113,8 +188,17 @@ export function Startup({
                 <tbody>
                   {items.map((i) => {
                     const missing = isUsedPriceMissing(i);
+                    const hasUrl = i.url.trim() !== '';
+                    const notesOpen = expandedNotesId === i.id;
+                    const noteRows = Math.min(
+                      12,
+                      Math.max(3, i.notes.split('\n').length, Math.ceil((i.notes.length || 1) / 42)),
+                    );
                     return (
-                      <tr key={i.id} className={i.final ? 'line-final' : 'line-draft'}>
+                      <tr
+                        key={i.id}
+                        className={`${i.final ? 'line-final' : 'line-draft'}${notesOpen ? ' row-open' : ''}`}
+                      >
                         <td>
                           <input className="cell" value={i.name} onChange={(e) => patchItem(i.id, { name: e.target.value })} />
                           {missing && (
@@ -162,25 +246,66 @@ export function Startup({
                         <td>
                           <input className="cell" value={i.supplier} onChange={(e) => patchItem(i.id, { supplier: e.target.value })} />
                         </td>
-                        <td>
-                          <input className="cell" value={i.url} onChange={(e) => patchItem(i.id, { url: e.target.value })} />
+                        <td className="url-cell">
+                          <button
+                            type="button"
+                            className={`url-btn${hasUrl ? ' has-url' : ''}`}
+                            aria-label={hasUrl ? 'Open link' : 'Add link'}
+                            onClick={(e) => onUrlClick(e, i)}
+                            onContextMenu={(e) => onUrlContext(e, i)}
+                          >
+                            <Link2 size={16} />
+                          </button>
                         </td>
-                        <td>
-                          <input className="cell" value={i.notes} onChange={(e) => patchItem(i.id, { notes: e.target.value })} />
+                        <td
+                          className="notes-cell"
+                          onMouseEnter={(e) => onNotesEnter(e, i)}
+                          onMouseLeave={() => setHoverNotes(null)}
+                          onClick={() => expandNotes(i.id)}
+                        >
+                          {notesOpen ? (
+                            <textarea
+                              className="cell notes-edit"
+                              value={i.notes}
+                              rows={noteRows}
+                              autoFocus
+                              onChange={(e) => patchItem(i.id, { notes: e.target.value })}
+                              onBlur={() => setExpandedNotesId((id) => (id === i.id ? null : id))}
+                              onClick={(e) => e.stopPropagation()}
+                              aria-label={`${i.name} notes`}
+                            />
+                          ) : (
+                            <input
+                              className="cell notes-compact"
+                              value={i.notes}
+                              onChange={(e) => patchItem(i.id, { notes: e.target.value })}
+                              onFocus={() => expandNotes(i.id)}
+                              aria-label={`${i.name} notes`}
+                            />
+                          )}
                         </td>
                         <td>
                           <input
                             type="checkbox"
                             checked={i.excludeFromContingency}
+                            disabled={i.final}
                             onChange={(e) => patchItem(i.id, { excludeFromContingency: e.target.checked })}
                             aria-label="Exclude from contingency"
+                            title={i.final ? 'Locked while price is final' : undefined}
                           />
                         </td>
                         <td>
                           <input
                             type="checkbox"
                             checked={i.final}
-                            onChange={(e) => patchItem(i.id, { final: e.target.checked })}
+                            onChange={(e) => {
+                              const final = e.target.checked;
+                              if (final) {
+                                patchItem(i.id, { final: true, excludeFromContingency: true });
+                              } else {
+                                patchItem(i.id, { final: false });
+                              }
+                            }}
                             aria-label="Final"
                           />
                         </td>
@@ -227,6 +352,42 @@ export function Startup({
           </div>
         );
       })}
+
+      {editingUrlId && editingUrlItem && urlEditPos && (
+        <div
+          className="url-edit"
+          style={{ left: urlEditPos.left, top: urlEditPos.top }}
+        >
+          <input
+            type="url"
+            value={editingUrlItem.url}
+            autoFocus
+            onFocus={(e) => e.target.select()}
+            onChange={(e) => patchItem(editingUrlItem.id, { url: e.target.value })}
+            onBlur={() => {
+              setEditingUrlId(null);
+              setUrlEditPos(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === 'Escape') {
+                e.currentTarget.blur();
+              }
+            }}
+            placeholder="https://"
+            aria-label="Edit link"
+          />
+        </div>
+      )}
+
+      {hoverNotes && expandedNotesId !== hoverNotes.id && hoverNotes.text.trim() && (
+        <div
+          className={`notes-preview${hoverNotes.above ? ' above' : ''}`}
+          style={{ left: hoverNotes.left, top: hoverNotes.top }}
+          role="tooltip"
+        >
+          {hoverNotes.text}
+        </div>
+      )}
     </div>
   );
 }
