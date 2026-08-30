@@ -1,4 +1,5 @@
 import { useState, type MouseEvent } from 'react';
+import { createPortal } from 'react-dom';
 import { Link2, Plus, Trash2 } from 'lucide-react';
 import { startupByCategory } from '../calc/model';
 import { isUsedPriceMissing } from '../calc/startup';
@@ -70,13 +71,18 @@ export function Startup({
     });
   }
 
-  function placePopover(el: HTMLElement, width = 280, height = 44) {
+  function placePopover(el: HTMLElement, width = 280) {
     const r = el.getBoundingClientRect();
     let left = r.right + 8;
-    let top = r.top - 4;
-    if (left + width > window.innerWidth - 8) left = Math.max(8, r.left - width - 8);
-    if (top + height > window.innerHeight - 8) top = Math.max(8, window.innerHeight - height - 8);
-    if (top < 8) top = 8;
+    let top = r.top + r.height / 2;
+    if (left + width > window.innerWidth - 8) left = r.left - width - 8;
+    if (left < 8) left = 8;
+    if (left + width > window.innerWidth - 8) left = Math.max(8, window.innerWidth - width - 8);
+    const height = 44;
+    const minTop = 8 + height / 2;
+    const maxTop = window.innerHeight - 8 - height / 2;
+    if (top < minTop) top = minTop;
+    if (top > maxTop) top = Math.max(minTop, maxTop);
     return { left, top };
   }
 
@@ -353,41 +359,45 @@ export function Startup({
         );
       })}
 
-      {editingUrlId && editingUrlItem && urlEditPos && (
-        <div
-          className="url-edit"
-          style={{ left: urlEditPos.left, top: urlEditPos.top }}
-        >
-          <input
-            type="url"
-            value={editingUrlItem.url}
-            autoFocus
-            onFocus={(e) => e.target.select()}
-            onChange={(e) => patchItem(editingUrlItem.id, { url: e.target.value })}
-            onBlur={() => {
-              setEditingUrlId(null);
-              setUrlEditPos(null);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === 'Escape') {
-                e.currentTarget.blur();
-              }
-            }}
-            placeholder="https://"
-            aria-label="Edit link"
-          />
-        </div>
-      )}
+      {editingUrlId && editingUrlItem && urlEditPos &&
+        createPortal(
+          <div
+            className="url-edit"
+            style={{ left: urlEditPos.left, top: urlEditPos.top }}
+          >
+            <input
+              type="url"
+              value={editingUrlItem.url}
+              autoFocus
+              onFocus={(e) => e.target.select()}
+              onChange={(e) => patchItem(editingUrlItem.id, { url: e.target.value })}
+              onBlur={() => {
+                setEditingUrlId(null);
+                setUrlEditPos(null);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === 'Escape') {
+                  e.currentTarget.blur();
+                }
+              }}
+              placeholder="https://"
+              aria-label="Edit link"
+            />
+          </div>,
+          document.body,
+        )}
 
-      {hoverNotes && expandedNotesId !== hoverNotes.id && hoverNotes.text.trim() && (
-        <div
-          className={`notes-preview${hoverNotes.above ? ' above' : ''}`}
-          style={{ left: hoverNotes.left, top: hoverNotes.top }}
-          role="tooltip"
-        >
-          {hoverNotes.text}
-        </div>
-      )}
+      {hoverNotes && expandedNotesId !== hoverNotes.id && hoverNotes.text.trim() &&
+        createPortal(
+          <div
+            className={`notes-preview${hoverNotes.above ? ' above' : ''}`}
+            style={{ left: hoverNotes.left, top: hoverNotes.top }}
+            role="tooltip"
+          >
+            {hoverNotes.text}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }
