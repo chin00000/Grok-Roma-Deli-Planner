@@ -1,7 +1,7 @@
 import { AlertTriangle } from 'lucide-react';
 import { computeModel } from '../calc/model';
 import { Donut, PayoffChart, StackBar } from '../components/Charts';
-import { money, monthsLabel, percent } from '../format';
+import { money, monthsLabel, percent, signedClass } from '../format';
 import type { AppState, Preview } from '../types';
 
 function Switch({
@@ -116,23 +116,23 @@ export function Home({
       <div className="grid grid-4" style={{ marginBottom: 16 }}>
         <div className="card">
           <h3>Revenue / mo</h3>
-          <div className="kpi">{money(model.revenue)}</div>
+          <div className={`kpi ${signedClass(model.revenue)}`}>{money(model.revenue)}</div>
           <div className="kpi-sub">Active units only</div>
         </div>
         <div className="card">
           <h3>Contribution vs fixed</h3>
-          <div className="kpi">{money(model.contribution)}</div>
-          <div className="kpi-sub">Fixed {money(model.fixedTotal)} · OP {money(model.operatingProfit)}</div>
+          <div className={`kpi ${signedClass(model.contribution)}`}>{money(model.contribution)}</div>
+          <div className="kpi-sub">Fixed <span className={signedClass(model.fixedTotal)}>{money(model.fixedTotal)}</span> · OP <span className={signedClass(model.operatingProfit)}>{money(model.operatingProfit)}</span></div>
         </div>
         <div className="card">
           <h3>Labour vs sales</h3>
-          <div className="kpi">{percent(model.labourToSales, true)}</div>
-          <div className="kpi-sub">Loaded labour {money(model.labourMonthly)} · prime cost {percent(model.primeCostPct)}</div>
+          <div className={`kpi ${signedClass(model.labourToSales)}`}>{percent(model.labourToSales, true)}</div>
+          <div className="kpi-sub">Loaded labour <span className={signedClass(model.labourMonthly)}>{money(model.labourMonthly)}</span> · prime cost <span className={signedClass(model.primeCostPct)}>{percent(model.primeCostPct)}</span></div>
         </div>
         <div className="card">
           <h3>Cash after debt</h3>
           <div className={`kpi ${model.cashAfterDebt < 0 ? 'neg' : 'pos'}`}>{money(model.cashAfterDebt)}</div>
-          <div className="kpi-sub">After drawings {money(model.cashAfterDebtAndDrawings)}</div>
+          <div className="kpi-sub">After drawings <span className={signedClass(model.cashAfterDebtAndDrawings)}>{money(model.cashAfterDebtAndDrawings)}</span></div>
         </div>
       </div>
 
@@ -178,7 +178,7 @@ export function Home({
             {model.partners.map((p) => (
               <div key={p.id}>
                 <div className="muted">{p.name}</div>
-                <div className="kpi" style={{ fontSize: 22 }}>{money(p.profitShare)}</div>
+                <div className={`kpi ${signedClass(p.profitShare)}`} style={{ fontSize: 22 }}>{money(p.profitShare)}</div>
                 <div className="kpi-sub">Share of operating profit / mo</div>
               </div>
             ))}
@@ -196,12 +196,12 @@ export function Home({
           <div className="legend">
             {a && (
               <span>
-                {a.name}: {monthsLabel(a.amort.monthsToClear)} · interest {money(a.amort.totalInterest)}
+                {a.name}: {monthsLabel(a.amort.monthsToClear)} · interest <span className={signedClass(a.amort.totalInterest)}>{money(a.amort.totalInterest)}</span>
               </span>
             )}
             {b && (
               <span>
-                {b.name}: {monthsLabel(b.amort.monthsToClear)} · interest {money(b.amort.totalInterest)}
+                {b.name}: {monthsLabel(b.amort.monthsToClear)} · interest <span className={signedClass(b.amort.totalInterest)}>{money(b.amort.totalInterest)}</span>
               </span>
             )}
           </div>
@@ -229,24 +229,24 @@ export function Home({
                   <td>
                     {s.name} {s.on ? '' : '(off)'}
                   </td>
-                  <td className="num">{money(s.revenue)}</td>
-                  <td className="num">{money(s.cogs)}</td>
-                  <td className="num">{money(s.labour)}</td>
-                  <td className="num">{money(s.contribution)}</td>
-                  <td className="num">{money(s.extraFixed)}</td>
-                  <td className="num">{money(s.operatingProfit)}</td>
+                  <td className={`num ${signedClass(s.revenue)}`}>{money(s.revenue)}</td>
+                  <td className={`num ${signedClass(s.cogs)}`}>{money(s.cogs)}</td>
+                  <td className={`num ${signedClass(s.labour)}`}>{money(s.labour)}</td>
+                  <td className={`num ${signedClass(s.contribution)}`}>{money(s.contribution)}</td>
+                  <td className={`num ${signedClass(s.extraFixed)}`}>{money(s.extraFixed)}</td>
+                  <td className={`num ${signedClass(s.operatingProfit)}`}>{money(s.operatingProfit)}</td>
                 </tr>
               ))}
             </tbody>
             <tfoot>
               <tr>
                 <td>Total</td>
-                <td className="num">{money(model.revenue)}</td>
-                <td className="num">{money(model.cogs)}</td>
-                <td className="num">{money(model.labourMonthly)}</td>
-                <td className="num">{money(model.contribution)}</td>
-                <td className="num">{money(model.fixedTotal)}</td>
-                <td className="num">{money(model.operatingProfit)}</td>
+                <td className={`num ${signedClass(model.revenue)}`}>{money(model.revenue)}</td>
+                <td className={`num ${signedClass(model.cogs)}`}>{money(model.cogs)}</td>
+                <td className={`num ${signedClass(model.labourMonthly)}`}>{money(model.labourMonthly)}</td>
+                <td className={`num ${signedClass(model.contribution)}`}>{money(model.contribution)}</td>
+                <td className={`num ${signedClass(model.fixedTotal)}`}>{money(model.fixedTotal)}</td>
+                <td className={`num ${signedClass(model.operatingProfit)}`}>{money(model.operatingProfit)}</td>
               </tr>
             </tfoot>
           </table>
