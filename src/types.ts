@@ -104,6 +104,77 @@ export interface RosterCell {
   day: Weekday;
   dayPart: DayPart;
   hours: number;
+  /** Hours from midnight (e.g. 8.5 = 8:30). Optional on older cells. */
+  startHour?: number;
+  endHour?: number;
+}
+
+export type RosterDept = 'deli' | 'catering' | 'wine';
+
+export const DAY_PART_START: Record<DayPart, number> = {
+  coffee_rush: 6,
+  cafe_deli: 8,
+  catering_prep: 9,
+  wine_bar: 17,
+};
+
+export const ROSTER_DEPTS: { id: RosterDept; label: string }[] = [
+  { id: 'deli', label: 'Deli' },
+  { id: 'catering', label: 'Catering' },
+  { id: 'wine', label: 'Wine' },
+];
+
+export function deptOf(dayPart: DayPart): RosterDept {
+  if (dayPart === 'catering_prep') return 'catering';
+  if (dayPart === 'wine_bar') return 'wine';
+  return 'deli';
+}
+
+export function dayPartForDept(dept: RosterDept, startHour: number): DayPart {
+  if (dept === 'catering') return 'catering_prep';
+  if (dept === 'wine') return 'wine_bar';
+  return startHour < 8 ? 'coffee_rush' : 'cafe_deli';
+}
+
+export function nextDept(dept: RosterDept): RosterDept {
+  const order: RosterDept[] = ['deli', 'catering', 'wine'];
+  return order[(order.indexOf(dept) + 1) % order.length] ?? 'deli';
+}
+
+export function snapHalf(h: number): number {
+  return Math.round(h * 2) / 2;
+}
+
+/** Infer start/end for cells that only have hours. Does not mutate the cell. */
+export function inferTimes(cell: RosterCell): { startHour: number; endHour: number; hours: number } {
+  let start = cell.startHour;
+  let end = cell.endHour;
+  if (typeof start !== 'number' || Number.isNaN(start) || typeof end !== 'number' || Number.isNaN(end)) {
+    start = DAY_PART_START[cell.dayPart] ?? 8;
+    end = start + (Number(cell.hours) || 0);
+  }
+  const hours = Math.max(0.5, end - start);
+  return { startHour: start, endHour: start + hours, hours };
+}
+
+export function cellWithRange(
+  cell: RosterCell,
+  startHour: number,
+  endHour: number,
+  day: Weekday = cell.day,
+): RosterCell {
+  const start = snapHalf(startHour);
+  const end = snapHalf(endHour);
+  const hours = Math.max(0.5, end - start);
+  const dept = deptOf(cell.dayPart);
+  return {
+    ...cell,
+    day,
+    startHour: start,
+    endHour: start + hours,
+    hours,
+    dayPart: dayPartForDept(dept, start),
+  };
 }
 
 export interface PenaltyRates {
