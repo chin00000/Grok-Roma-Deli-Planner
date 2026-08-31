@@ -16,6 +16,25 @@ const MAP_END = 22;
 const MAP_SPAN = MAP_END - MAP_START;
 const DEFAULT_DUR = 4;
 const MIN_DUR = 0.5;
+/** Base day-row height (px). Two stacked bars split this; more lanes grow the row. */
+const DAY_ROW_BASE = 58;
+const STACK_REF = 2;
+const LANE_PITCH = DAY_ROW_BASE / STACK_REF;
+const BAR_INSET = 2;
+
+function dayMaxLanes(pack: Map<string, { col: number; cols: number }> | undefined, ids: string[]): number {
+  let max = 1;
+  if (!pack) return max;
+  for (const id of ids) {
+    const cols = pack.get(id)?.cols ?? 1;
+    if (cols > max) max = cols;
+  }
+  return max;
+}
+
+function dayRowHeight(maxLanes: number): number {
+  return Math.max(DAY_ROW_BASE, Math.max(1, maxLanes) * LANE_PITCH);
+}
 
 function hourPct(hour: number): number {
   return ((hour - MAP_START) / MAP_SPAN) * 100;
@@ -289,12 +308,19 @@ export function RosterMap({
         {DAYS.map((d) => {
           const pack = packByDay.get(d.id);
           const dayCells = timed.filter((t) => t.cell.day === d.id);
+          const maxLanes = dayMaxLanes(
+            pack,
+            dayCells.map((t) => t.cell.id),
+          );
+          const rowH = dayRowHeight(maxLanes);
+          const laneH = rowH / maxLanes;
           return (
             <Fragment key={d.id}>
               <div className="roster-day-head">{d.short}</div>
               <div
                 className="roster-day"
                 data-day={d.id}
+                style={{ height: rowH }}
                 ref={(el) => {
                   dayRefs.current[d.id] = el;
                 }}
@@ -311,8 +337,6 @@ export function RosterMap({
                   const layout = pack?.get(t.cell.id) ?? { col: 0, cols: 1 };
                   const left = hourPct(t.startHour);
                   const width = Math.max(hourPct(t.endHour) - hourPct(t.startHour), 1.5);
-                  const heightPct = 100 / layout.cols;
-                  const topPct = layout.col * heightPct;
                   const deptLabel = dept === 'deli' ? 'Deli' : dept === 'catering' ? 'Catering' : 'Wine';
                   return (
                     <div
@@ -321,8 +345,8 @@ export function RosterMap({
                       style={{
                         left: `${left}%`,
                         width: `${width}%`,
-                        top: `calc(${topPct}% + 2px)`,
-                        height: `calc(${heightPct}% - 4px)`,
+                        top: `${layout.col * laneH + BAR_INSET}px`,
+                        height: `${laneH - BAR_INSET * 2}px`,
                       }}
                       title={`${emp.name} · ${fmtClock(t.startHour)}–${fmtClock(t.endHour)} · ${deptLabel}`}
                       onDragOver={(e) => {
