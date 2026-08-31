@@ -650,16 +650,16 @@ th.out-notes, td.out-notes {
 
 .roster-map-scroll {
   overflow-x: auto;
+  width: 100%;
   margin: 0 -4px;
   padding: 0 4px;
 }
 .roster-map {
-  --hour-px: 42px;
-  --map-w: 756px;
   display: grid;
-  grid-template-columns: 56px var(--map-w);
+  grid-template-columns: 56px 1fr;
   grid-template-rows: 28px repeat(7, 58px);
-  min-width: calc(56px + var(--map-w));
+  width: 100%;
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--paper);
@@ -673,7 +673,7 @@ th.out-notes, td.out-notes {
 .roster-times-head {
   position: relative;
   height: 28px;
-  width: var(--map-w);
+  width: 100%;
   background: var(--paper-2);
   border-bottom: 1px solid var(--line);
 }
@@ -702,20 +702,21 @@ th.out-notes, td.out-notes {
 .roster-day {
   position: relative;
   height: 58px;
-  width: var(--map-w);
+  width: 100%;
   border-top: 1px solid var(--line);
   background-image:
     repeating-linear-gradient(
       to right,
       transparent 0,
-      transparent calc(var(--hour-px) / 2 - 1px),
-      color-mix(in srgb, var(--line) 45%, transparent) calc(var(--hour-px) / 2 - 1px),
-      color-mix(in srgb, var(--line) 45%, transparent) calc(var(--hour-px) / 2),
-      transparent calc(var(--hour-px) / 2),
-      transparent calc(var(--hour-px) - 1px),
-      var(--line) calc(var(--hour-px) - 1px),
-      var(--line) var(--hour-px)
+      transparent calc(50% - 1px),
+      color-mix(in srgb, var(--line) 45%, transparent) calc(50% - 1px),
+      color-mix(in srgb, var(--line) 45%, transparent) 50%,
+      transparent 50%,
+      transparent calc(100% - 1px),
+      var(--line) calc(100% - 1px),
+      var(--line) 100%
     );
+  background-size: calc(100% / 18) 100%;
   background-color: var(--paper);
 }
 .roster-block {
