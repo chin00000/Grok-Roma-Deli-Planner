@@ -158,7 +158,7 @@ export function Startup({
               </div>
             </div>
             <div className="table-wrap">
-              <table>
+              <table className="lines">
                 <thead>
                   <tr>
                     <th>Item</th>

@@ -278,6 +278,18 @@ input.cell, select.cell, textarea.cell {
   padding: 4px 6px;
   border-radius: 8px;
 }
+
+/* Category / Item / notes are untyped `.cell` — they keep the UA control size (~13.333px)
+   instead of the 14px typed-input rule. New/Used/Cost/Frequency/Monthly/Annual were 14px.
+   Pin those to the Category size. Headers stay 12px (already match Category/Item th). */
+table.lines {
+  --row-font: 13.333px;
+}
+table.lines input.cell[type='number'],
+table.lines select.cell,
+table.lines td.num {
+  font-size: var(--row-font);
+}
 input.cell:hover, select.cell:hover, textarea.cell:hover { background: var(--bg); border-color: var(--line); }
 input.cell.supplier-input {
   width: 8rem;
