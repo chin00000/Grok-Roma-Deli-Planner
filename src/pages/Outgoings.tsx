@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { toAnnual, toMonthly } from '../calc/frequency';
 import { CategoryInput } from '../components/CategoryInput';
+import { NotesCell } from '../components/NotesCell';
 import { groupByItemCategory } from '../groupCategory';
 import { money, signedClass } from '../format';
 import type { AppState, Frequency, OutgoingItem, UnitId } from '../types';
@@ -124,9 +125,12 @@ export function Outgoings({
                       </td>
                       <td className={`num ${signedClass(toMonthly(i.cost, i.frequency))}`}>{money(toMonthly(i.cost, i.frequency), true)}</td>
                       <td className={`num ${signedClass(toAnnual(i.cost, i.frequency))}`}>{money(toAnnual(i.cost, i.frequency), true)}</td>
-                      <td className="out-notes">
-                        <input className="cell out-notes-input" type="text" value={i.notes} onChange={(e) => patch(i.id, { notes: e.target.value })} />
-                      </td>
+                      <NotesCell
+                        className="out-notes"
+                        value={i.notes}
+                        onChange={(notes) => patch(i.id, { notes })}
+                        aria-label={`${i.name} notes`}
+                      />
                       <td>
                         <input
                           type="checkbox"
