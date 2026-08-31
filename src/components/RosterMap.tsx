@@ -341,7 +341,7 @@ export function RosterMap({
                   return (
                     <div
                       key={t.cell.id}
-                      className={`roster-block dept-${dept}${drag?.id === t.cell.id ? ' dragging' : ''}`}
+                      className={`roster-block dept-${dept}${emp.isOwner ? ' is-owner' : ''}${drag?.id === t.cell.id ? ' dragging' : ''}`}
                       style={{
                         left: `${left}%`,
                         width: `${width}%`,
