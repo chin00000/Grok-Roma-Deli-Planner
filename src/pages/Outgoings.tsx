@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { toAnnual, toMonthly } from '../calc/frequency';
+import { CategoryInput } from '../components/CategoryInput';
 import { groupByItemCategory } from '../groupCategory';
 import { money, signedClass } from '../format';
 import type { AppState, Frequency, OutgoingItem, UnitId } from '../types';
@@ -92,10 +93,9 @@ export function Outgoings({
                         <input className="cell" value={i.name} onChange={(e) => patch(i.id, { name: e.target.value })} />
                       </td>
                       <td className="cat-cell">
-                        <input
-                          className="cell cat-input"
-                          value={i.category ?? ''}
-                          onChange={(e) => patch(i.id, { category: e.target.value })}
+                        <CategoryInput
+                          value={i.category}
+                          onCommit={(category) => patch(i.id, { category })}
                           aria-label={`${i.name} category`}
                         />
                       </td>

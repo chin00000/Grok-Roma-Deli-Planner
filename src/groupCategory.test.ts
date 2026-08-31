@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { UNCATEGORISED_LABEL, groupByItemCategory } from './groupCategory';
+import { UNCATEGORISED_LABEL, commitCategory, groupByItemCategory } from './groupCategory';
 
 describe('groupByItemCategory', () => {
   it('keeps first-seen named order and first spelling, case-insensitive', () => {
@@ -26,5 +26,17 @@ describe('groupByItemCategory', () => {
       [UNCATEGORISED_LABEL, true],
     ]);
     expect(groups[1]?.items.map((i) => i.id)).toEqual(['a', 'c', 'd']);
+  });
+});
+
+describe('commitCategory', () => {
+  // CategoryInput on Startup/Outgoings writes this on blur (Enter blurs). Grouping
+  // only sees committed store values, so mid-word keystrokes do not open a new heading.
+  it('trims and treats blank as uncategorised', () => {
+    expect(commitCategory('  Legal  ')).toBe('Legal');
+    expect(commitCategory('equipment')).toBe('equipment');
+    expect(commitCategory('   ')).toBeUndefined();
+    expect(commitCategory('')).toBeUndefined();
+    expect(commitCategory(undefined)).toBeUndefined();
   });
 });

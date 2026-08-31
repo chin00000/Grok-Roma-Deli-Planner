@@ -4,6 +4,12 @@ export function itemCategoryLabel(value: string | undefined | null): string {
   return (value ?? '').trim();
 }
 
+/** Trim for persist-on-blur. Blank/whitespace becomes undefined (uncategorised). */
+export function commitCategory(value: string | undefined | null): string | undefined {
+  const trimmed = itemCategoryLabel(value);
+  return trimmed || undefined;
+}
+
 export interface CategoryGroup<T> {
   key: string;
   label: string;
@@ -11,7 +17,10 @@ export interface CategoryGroup<T> {
   items: T[];
 }
 
-/** Group items by free-text category. Named groups keep first-seen order and first spelling; blank/whitespace last. */
+/**
+ * Group items by free-text category. Named groups keep first-seen order and first spelling; blank/whitespace last.
+ * Callers must pass committed store values (CategoryInput writes on blur), not a live keystroke draft.
+ */
 export function groupByItemCategory<T extends { category?: string }>(items: T[]): CategoryGroup<T>[] {
   const named: CategoryGroup<T>[] = [];
   const uncategorisedItems: T[] = [];
