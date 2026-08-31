@@ -1,8 +1,9 @@
 import { useRef, useState } from 'react';
-import { Download, Upload } from 'lucide-react';
+import { Download, RotateCcw, Upload } from 'lucide-react';
 import { Modal } from '../components/Modal';
 import { exportWorkbook, importWorkbook } from '../excel/workbook';
 import { seedState } from '../seed';
+import { BACKUP_KEY, exportJson, tryRestoreBackup } from '../store';
 import type { AppState, Theme } from '../types';
 
 export function Settings({
@@ -15,6 +16,8 @@ export function Settings({
   const fileRef = useRef<HTMLInputElement>(null);
   const [pending, setPending] = useState<ArrayBuffer | null>(null);
   const [resetOpen, setResetOpen] = useState(false);
+  const [restoreOpen, setRestoreOpen] = useState(false);
+  const hasBackup = typeof localStorage !== 'undefined' && localStorage.getItem(BACKUP_KEY) != null;
 
   async function onExport() {
     const buf = await exportWorkbook(state);
@@ -27,6 +30,22 @@ export function Settings({
     a.download = 'Roma-Deli-Planner.xlsx';
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function onDownloadJson() {
+    const blob = new Blob([exportJson(state)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'Roma-Deli-Planner.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function confirmRestore() {
+    const restored = tryRestoreBackup();
+    if (restored) setState(restored);
+    setRestoreOpen(false);
   }
 
   async function onPick(file: File) {
@@ -178,6 +197,28 @@ export function Settings({
       </div>
 
       <div className="card" style={{ marginTop: 16 }}>
+        <h3>Local database</h3>
+        <p className="muted">
+          Data lives in this browser on this URL only. Another Vercel URL is a different database.
+        </p>
+        <div className="row" style={{ marginTop: 12 }}>
+          <button type="button" className="btn primary" onClick={onDownloadJson}>
+            <Download size={14} /> Download JSON backup
+          </button>
+          <button
+            type="button"
+            className="btn"
+            disabled={!hasBackup}
+            onClick={() => {
+              if (localStorage.getItem(BACKUP_KEY)) setRestoreOpen(true);
+            }}
+          >
+            <RotateCcw size={14} /> Restore last autosave
+          </button>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginTop: 16 }}>
         <h3>Database</h3>
         <p className="muted">Reset to the Darwin 30 Aug 2026 seed. This overwrites local data.</p>
         <button type="button" className="btn danger" onClick={() => setResetOpen(true)}>
@@ -196,6 +237,20 @@ export function Settings({
           <p>
             Importing this spreadsheet will replace the current localStorage database. This cannot
             be undone except by re-importing a previous export.
+          </p>
+        </Modal>
+      )}
+      {restoreOpen && (
+        <Modal
+          title="Restore last autosave?"
+          danger
+          confirmLabel="Restore"
+          onCancel={() => setRestoreOpen(false)}
+          onConfirm={confirmRestore}
+        >
+          <p>
+            Replace the current plan with the last-good snapshot taken just before the most recent
+            save. Reset to seed is still the only way to wipe.
           </p>
         </Modal>
       )}
