@@ -1,5 +1,7 @@
+import { Fragment } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { toAnnual, toMonthly } from '../calc/frequency';
+import { groupByItemCategory } from '../groupCategory';
 import { money, signedClass } from '../format';
 import type { AppState, Frequency, OutgoingItem, UnitId } from '../types';
 import { FREQUENCIES, UNITS, newId } from '../types';
@@ -68,6 +70,7 @@ export function Outgoings({
                 <thead>
                   <tr>
                     <th>Item</th>
+                    <th className="cat-col">Category</th>
                     <th className="out-cost num">Cost</th>
                     <th>Frequency</th>
                     <th className="num">Monthly</th>
@@ -78,10 +81,23 @@ export function Outgoings({
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((i) => (
+                  {groupByItemCategory(items).map((group) => (
+                    <Fragment key={group.key || '__uncat'}>
+                      <tr className={`cat-head${group.uncategorised ? ' uncat' : ''}`}>
+                        <td colSpan={9}>{group.label}</td>
+                      </tr>
+                      {group.items.map((i) => (
                     <tr key={i.id} className={i.final ? 'line-final' : 'line-draft'}>
                       <td>
                         <input className="cell" value={i.name} onChange={(e) => patch(i.id, { name: e.target.value })} />
+                      </td>
+                      <td className="cat-cell">
+                        <input
+                          className="cell cat-input"
+                          value={i.category ?? ''}
+                          onChange={(e) => patch(i.id, { category: e.target.value })}
+                          aria-label={`${i.name} category`}
+                        />
                       </td>
                       <td className="out-cost num">
                         <input
@@ -135,11 +151,13 @@ export function Outgoings({
                         </button>
                       </td>
                     </tr>
+                      ))}
+                    </Fragment>
                   ))}
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td>Category</td>
+                    <td colSpan={2}>Total</td>
                     <td className="out-cost num" />
                     <td />
                     <td className={`num ${signedClass(m)}`}>{money(m)}</td>

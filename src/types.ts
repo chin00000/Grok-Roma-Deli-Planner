@@ -53,6 +53,8 @@ export interface StartupItem {
   id: string;
   categoryId: string;
   name: string;
+  /** Free-text grouping inside a department window. Missing/blank = uncategorised. */
+  category?: string;
   newPrice: number;
   usedPrice: number | null;
   condition: ItemCondition;
@@ -75,6 +77,8 @@ export interface OutgoingItem {
   id: string;
   categoryId: string;
   name: string;
+  /** Free-text grouping inside a department window. Missing/blank = uncategorised. */
+  category?: string;
   cost: number;
   frequency: Frequency;
   notes: string;

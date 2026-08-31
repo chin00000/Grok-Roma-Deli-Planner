@@ -1,7 +1,8 @@
-import { useState, type MouseEvent } from 'react';
+import { Fragment, useState, type MouseEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { Link2, Plus, Trash2 } from 'lucide-react';
 import { startupByCategory } from '../calc/model';
+import { groupByItemCategory } from '../groupCategory';
 import { isUsedPriceMissing } from '../calc/startup';
 import { money, signedClass } from '../format';
 import type { AppState, ItemCondition, StartupItem, UnitId } from '../types';
@@ -191,6 +192,7 @@ export function Startup({
                 <thead>
                   <tr>
                     <th>Item</th>
+                    <th className="cat-col">Category</th>
                     <th className="num">New price</th>
                     <th className="num">Used price</th>
                     <th>Condition</th>
@@ -209,7 +211,12 @@ export function Startup({
                   </tr>
                 </thead>
                 <tbody>
-                  {items.map((i) => {
+                  {groupByItemCategory(items).map((group) => (
+                    <Fragment key={group.key || '__uncat'}>
+                      <tr className={`cat-head${group.uncategorised ? ' uncat' : ''}`}>
+                        <td colSpan={11}>{group.label}</td>
+                      </tr>
+                      {group.items.map((i) => {
                     const missing = isUsedPriceMissing(i);
                     const hasUrl = i.url.trim() !== '';
                     const notesOpen = expandedNotesId === i.id;
@@ -227,6 +234,14 @@ export function Startup({
                           {missing && (
                             <span className="row-hint">Used price missing — counted as $0</span>
                           )}
+                        </td>
+                        <td className="cat-cell">
+                          <input
+                            className="cell cat-input"
+                            value={i.category ?? ''}
+                            onChange={(e) => patchItem(i.id, { category: e.target.value })}
+                            aria-label={`${i.name} category`}
+                          />
                         </td>
                         <td className="num" style={{ opacity: i.condition === 'used' ? 0.45 : 1 }}>
                           <input
@@ -339,11 +354,13 @@ export function Startup({
                         </td>
                       </tr>
                     );
-                  })}
+                      })}
+                    </Fragment>
+                  ))}
                 </tbody>
                 <tfoot>
                   <tr>
-                    <td>Items</td>
+                    <td colSpan={2}>Items</td>
                     <td className={`num ${signedClass(roll?.items ?? 0)}`} colSpan={2}>
                       {money(roll?.items ?? 0)}
                     </td>
@@ -352,7 +369,7 @@ export function Startup({
                     </td>
                   </tr>
                   <tr>
-                    <td>
+                    <td colSpan={2}>
                       {cat.contingencyPct}% Contingency
                     </td>
                     <td className={`num ${signedClass(roll?.contingency ?? 0)}`} colSpan={2}>
@@ -363,7 +380,7 @@ export function Startup({
                     </td>
                   </tr>
                   <tr>
-                    <td>Unit total</td>
+                    <td colSpan={2}>Unit total</td>
                     <td className={`num ${signedClass(roll?.total ?? 0)}`} colSpan={2}>
                       {money(roll?.total ?? 0)}
                     </td>

@@ -120,7 +120,7 @@ export async function exportWorkbook(state: AppState): Promise<ArrayBuffer> {
   addSheet(
     wb,
     'Startup',
-    ['id', 'categoryId', 'unit', 'name', 'newPrice', 'usedPrice', 'condition', 'excludeFromContingency', 'supplier', 'url', 'notes', 'final', 'calculated'],
+    ['id', 'categoryId', 'unit', 'name', 'newPrice', 'usedPrice', 'condition', 'excludeFromContingency', 'supplier', 'url', 'notes', 'final', 'category', 'calculated'],
     state.startupItems.map((i) => [
       i.id,
       i.categoryId,
@@ -134,9 +134,10 @@ export async function exportWorkbook(state: AppState): Promise<ArrayBuffer> {
       i.url,
       i.notes,
       i.final,
+      i.category ?? '',
       startupItemAmount(i),
     ]),
-    [5, 6, 13],
+    [5, 6, 14],
   );
   const startWs = wb.getWorksheet('Startup')!;
   startWs.addRow([]);
@@ -148,7 +149,7 @@ export async function exportWorkbook(state: AppState): Promise<ArrayBuffer> {
   addSheet(
     wb,
     'Outgoings',
-    ['id', 'categoryId', 'unit', 'name', 'cost', 'frequency', 'monthly', 'annual', 'notes', 'final'],
+    ['id', 'categoryId', 'unit', 'name', 'cost', 'frequency', 'monthly', 'annual', 'notes', 'final', 'category'],
     state.outgoingItems.map((i) => [
       i.id,
       i.categoryId,
@@ -160,6 +161,7 @@ export async function exportWorkbook(state: AppState): Promise<ArrayBuffer> {
       toMonthly(i.cost, i.frequency) * 12,
       i.notes,
       i.final,
+      i.category ?? '',
     ]),
     [5, 7, 8],
   );
@@ -357,11 +359,13 @@ export async function importWorkbook(buffer: ArrayBuffer, current: AppState): Pr
   if (startup) {
     const items: StartupItem[] = [];
     const finalCol = headerCol(startup, 'final');
+    const categoryCol = headerCol(startup, 'category');
     startup.eachRow((row, i) => {
       if (i === 1) return;
       const id = cell(row, 1);
       if (!id || id === 'CONTINGENCY') return;
       const condRaw = cell(row, 7).trim().toLowerCase();
+      const category = categoryCol ? cell(row, categoryCol) : '';
       items.push({
         id,
         categoryId: cell(row, 2),
@@ -375,6 +379,7 @@ export async function importWorkbook(buffer: ArrayBuffer, current: AppState): Pr
         url: cell(row, 10),
         notes: cell(row, 11),
         final: finalCol ? bool(row, finalCol) : false,
+        ...(category.trim() ? { category } : {}),
       });
     });
     if (items.length) next.startupItems = items;
@@ -384,10 +389,12 @@ export async function importWorkbook(buffer: ArrayBuffer, current: AppState): Pr
   if (outgoings) {
     const items: OutgoingItem[] = [];
     const finalCol = headerCol(outgoings, 'final');
+    const categoryCol = headerCol(outgoings, 'category');
     outgoings.eachRow((row, i) => {
       if (i === 1) return;
       const id = cell(row, 1);
       if (!id) return;
+      const category = categoryCol ? cell(row, categoryCol) : '';
       items.push({
         id,
         categoryId: cell(row, 2),
@@ -397,6 +404,7 @@ export async function importWorkbook(buffer: ArrayBuffer, current: AppState): Pr
         frequency: (cell(row, 6) as Frequency) || 'monthly',
         notes: cell(row, 9) || cell(row, 7),
         final: finalCol ? bool(row, finalCol) : false,
+        ...(category.trim() ? { category } : {}),
       });
     });
     if (items.length) next.outgoingItems = items;
