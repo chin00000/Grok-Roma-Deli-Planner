@@ -167,8 +167,17 @@ export async function exportWorkbook(state: AppState): Promise<ArrayBuffer> {
   addSheet(
     wb,
     'Labour',
-    ['id', 'employeeId', 'day', 'dayPart', 'hours', 'notes'],
-    state.roster.map((c) => [c.id, c.employeeId, c.day, c.dayPart, c.hours, '']),
+    ['id', 'employeeId', 'day', 'dayPart', 'hours', 'notes', 'startHour', 'endHour'],
+    state.roster.map((c) => [
+      c.id,
+      c.employeeId,
+      c.day,
+      c.dayPart,
+      c.hours,
+      '',
+      c.startHour ?? '',
+      c.endHour ?? '',
+    ]),
   );
 
   addSheet(
@@ -396,17 +405,27 @@ export async function importWorkbook(buffer: ArrayBuffer, current: AppState): Pr
   const labour = wb.getWorksheet('Labour');
   if (labour) {
     const roster: RosterCell[] = [];
+    const startCol = headerCol(labour, 'startHour');
+    const endCol = headerCol(labour, 'endHour');
     labour.eachRow((row, i) => {
       if (i === 1) return;
       const id = cell(row, 1);
       if (!id) return;
-      roster.push({
+      const startHour = startCol != null ? numOrNull(row, startCol) : null;
+      const endHour = endCol != null ? numOrNull(row, endCol) : null;
+      const entry: RosterCell = {
         id,
         employeeId: cell(row, 2),
         day: cell(row, 3) as Weekday,
         dayPart: cell(row, 4) as DayPart,
         hours: num(row, 5),
-      });
+      };
+      if (startHour != null) entry.startHour = startHour;
+      if (endHour != null) entry.endHour = endHour;
+      if (startHour != null && endHour != null) {
+        entry.hours = Math.max(0.5, endHour - startHour);
+      }
+      roster.push(entry);
     });
     if (roster.length) next.roster = roster;
   }
