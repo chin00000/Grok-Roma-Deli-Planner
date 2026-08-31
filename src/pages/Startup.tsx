@@ -2,6 +2,7 @@ import { Fragment, useState, type MouseEvent } from 'react';
 import { createPortal } from 'react-dom';
 import { Link2, Plus, Trash2 } from 'lucide-react';
 import { startupByCategory } from '../calc/model';
+import { CategoryInput } from '../components/CategoryInput';
 import { groupByItemCategory } from '../groupCategory';
 import { isUsedPriceMissing } from '../calc/startup';
 import { money, signedClass } from '../format';
@@ -236,10 +237,9 @@ export function Startup({
                           )}
                         </td>
                         <td className="cat-cell">
-                          <input
-                            className="cell cat-input"
-                            value={i.category ?? ''}
-                            onChange={(e) => patchItem(i.id, { category: e.target.value })}
+                          <CategoryInput
+                            value={i.category}
+                            onCommit={(category) => patchItem(i.id, { category })}
                             aria-label={`${i.name} category`}
                           />
                         </td>
