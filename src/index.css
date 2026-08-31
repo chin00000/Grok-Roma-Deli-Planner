@@ -501,13 +501,13 @@ td.exc-cell input[type='checkbox'] {
   border-radius: 8px;
   border: 1px solid transparent;
   background: transparent;
-  color: var(--muted);
+  color: color-mix(in srgb, var(--stone) 42%, transparent);
   display: grid;
   place-items: center;
 }
-.url-btn:hover { background: var(--bg); color: var(--olive); }
-.url-btn.has-url { color: var(--olive); }
-.url-btn.has-url:hover { color: var(--olive-2); background: color-mix(in srgb, var(--olive) 12%, var(--paper)); }
+.url-btn:hover { background: var(--bg); color: color-mix(in srgb, var(--muted) 62%, transparent); }
+.url-btn.has-url { color: var(--ink); }
+.url-btn.has-url:hover { color: var(--ink); background: color-mix(in srgb, var(--ink) 8%, var(--paper)); }
 .url-edit {
   position: fixed;
   transform: translateY(-50%);
