@@ -1,5 +1,5 @@
 import { seedState } from './seed';
-import type { AppState, ItemCondition, RosterCell, StartupItem } from './types';
+import type { AppState, ItemCondition, OutgoingItem, RosterCell, StartupItem } from './types';
 
 export const STORAGE_KEY = 'roma-deli-planner-v2';
 export const BACKUP_KEY = 'roma-deli-planner-v2-prev';
@@ -41,12 +41,25 @@ function defaultCondition(value: unknown): ItemCondition {
   return value === 'used' ? 'used' : 'new';
 }
 
+function optionalCategory(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
 function migrateStartupItem(item: StartupItem): StartupItem {
   return {
     ...item,
     final: !!item.final,
     newPrice: typeof item.newPrice === 'number' && Number.isFinite(item.newPrice) ? item.newPrice : 0,
     condition: defaultCondition(item.condition),
+    category: optionalCategory(item.category),
+  };
+}
+
+function migrateOutgoingItem(item: OutgoingItem): OutgoingItem {
+  return {
+    ...item,
+    final: !!item.final,
+    category: optionalCategory(item.category),
   };
 }
 
@@ -62,7 +75,7 @@ function migrate(parsed: Record<string, unknown>): AppState {
   }
 
   next.startupItems = next.startupItems.map(migrateStartupItem);
-  next.outgoingItems = next.outgoingItems.map((i) => ({ ...i, final: !!i.final }));
+  next.outgoingItems = next.outgoingItems.map(migrateOutgoingItem);
   next.roster = normalizeRoster(next.roster) ?? next.roster;
 
   return next;
