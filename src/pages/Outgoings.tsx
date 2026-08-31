@@ -68,7 +68,7 @@ export function Outgoings({
               </button>
             </div>
             <div className="table-wrap">
-              <table>
+              <table className="lines">
                 <thead>
                   <tr>
                     <th>Item</th>
