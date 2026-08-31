@@ -738,16 +738,25 @@ th.out-notes, td.out-notes {
   box-shadow: var(--shadow);
 }
 .roster-block.dept-deli {
-  background: color-mix(in srgb, var(--olive) 82%, var(--ink));
+  --roster-bar: color-mix(in srgb, var(--olive) 82%, var(--ink));
+  background: var(--roster-bar);
   color: var(--paper);
 }
 .roster-block.dept-catering {
-  background: color-mix(in srgb, var(--tan) 86%, var(--paper));
+  --roster-bar: color-mix(in srgb, var(--tan) 86%, var(--paper));
+  background: var(--roster-bar);
   color: var(--ink);
 }
 .roster-block.dept-wine {
-  background: var(--wine);
+  --roster-bar: var(--wine);
+  background: var(--roster-bar);
   color: var(--wine-ink);
+}
+.roster-block.is-owner {
+  background: color-mix(in srgb, var(--roster-bar) 88%, white);
+}
+.roster-block:not(.is-owner) {
+  background: color-mix(in srgb, var(--roster-bar) 88%, black);
 }
 .roster-block-inner {
   display: flex;
