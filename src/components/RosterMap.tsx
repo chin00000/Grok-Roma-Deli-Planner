@@ -13,10 +13,13 @@ import {
 
 const MAP_START = 4;
 const MAP_END = 22;
-const HOUR_PX = 42;
-const MAP_W = (MAP_END - MAP_START) * HOUR_PX;
+const MAP_SPAN = MAP_END - MAP_START;
 const DEFAULT_DUR = 4;
 const MIN_DUR = 0.5;
+
+function hourPct(hour: number): number {
+  return ((hour - MAP_START) / MAP_SPAN) * 100;
+}
 
 type Drag =
   | { kind: 'move'; id: string; grabOffset: number; duration: number }
@@ -108,8 +111,8 @@ function packColumns(
   return result;
 }
 
-function xToHour(clientX: number, bodyLeft: number): number {
-  return snapHalf(MAP_START + (clientX - bodyLeft) / HOUR_PX);
+function xToHour(clientX: number, rect: DOMRect): number {
+  return snapHalf(MAP_START + ((clientX - rect.left) / rect.width) * MAP_SPAN);
 }
 
 export function RosterMap({
@@ -180,7 +183,7 @@ export function RosterMap({
     function onMove(e: PointerEvent) {
       const body = bodyRef.current;
       if (!body) return;
-      const hour = xToHour(e.clientX, body.getBoundingClientRect().left);
+      const hour = xToHour(e.clientX, body.getBoundingClientRect());
       const cell = rosterRef.current.find((c) => c.id === active.id);
       if (!cell) return;
       const t = inferTimes(cell);
@@ -224,7 +227,7 @@ export function RosterMap({
     const body = bodyRef.current;
     if (!body) return;
     const day = dayFromY(e.clientY) ?? fallbackDay;
-    let start = xToHour(e.clientX, body.getBoundingClientRect().left);
+    let start = xToHour(e.clientX, body.getBoundingClientRect());
     start = Math.min(Math.max(start, MAP_START), MAP_END - MIN_DUR);
     let end = start + DEFAULT_DUR;
     if (end > MAP_END) end = MAP_END;
@@ -266,15 +269,9 @@ export function RosterMap({
 
   return (
     <div className="roster-map-scroll">
-      <div
-        className={`roster-map${drag ? ' is-dragging' : ''}`}
-        style={{
-          ['--hour-px' as string]: `${HOUR_PX}px`,
-          ['--map-w' as string]: `${MAP_W}px`,
-        }}
-      >
+      <div className={`roster-map${drag ? ' is-dragging' : ''}`}>
         <div className="roster-corner" />
-        <div className="roster-times-head" ref={bodyRef} style={{ width: MAP_W }}>
+        <div className="roster-times-head" ref={bodyRef}>
           {hours.map((h) => (
             <div
               key={h}
@@ -282,7 +279,7 @@ export function RosterMap({
               style={
                 h === MAP_END
                   ? { right: 0 }
-                  : { left: (h - MAP_START) * HOUR_PX }
+                  : { left: `${hourPct(h)}%` }
               }
             >
               {fmtHourLabel(h)}
@@ -297,7 +294,6 @@ export function RosterMap({
               <div className="roster-day-head">{d.short}</div>
               <div
                 className="roster-day"
-                style={{ width: MAP_W }}
                 data-day={d.id}
                 ref={(el) => {
                   dayRefs.current[d.id] = el;
@@ -313,8 +309,8 @@ export function RosterMap({
                   if (!emp) return null;
                   const dept = deptOf(t.cell.dayPart);
                   const layout = pack?.get(t.cell.id) ?? { col: 0, cols: 1 };
-                  const left = (t.startHour - MAP_START) * HOUR_PX;
-                  const width = Math.max((t.endHour - t.startHour) * HOUR_PX, 16);
+                  const left = hourPct(t.startHour);
+                  const width = Math.max(hourPct(t.endHour) - hourPct(t.startHour), 1.5);
                   const heightPct = 100 / layout.cols;
                   const topPct = layout.col * heightPct;
                   const deptLabel = dept === 'deli' ? 'Deli' : dept === 'catering' ? 'Catering' : 'Wine';
@@ -323,8 +319,8 @@ export function RosterMap({
                       key={t.cell.id}
                       className={`roster-block dept-${dept}${drag?.id === t.cell.id ? ' dragging' : ''}`}
                       style={{
-                        left,
-                        width,
+                        left: `${left}%`,
+                        width: `${width}%`,
                         top: `calc(${topPct}% + 2px)`,
                         height: `calc(${heightPct}% - 4px)`,
                       }}
@@ -341,7 +337,7 @@ export function RosterMap({
                         e.preventDefault();
                         const body = bodyRef.current;
                         if (!body) return;
-                        const hour = xToHour(e.clientX, body.getBoundingClientRect().left);
+                        const hour = xToHour(e.clientX, body.getBoundingClientRect());
                         setDrag({
                           kind: 'move',
                           id: t.cell.id,
