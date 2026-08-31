@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { Link2, Plus, Trash2 } from 'lucide-react';
 import { startupByCategory } from '../calc/model';
 import { CategoryInput } from '../components/CategoryInput';
+import { NotesCell } from '../components/NotesCell';
 import { groupByItemCategory } from '../groupCategory';
 import { isUsedPriceMissing } from '../calc/startup';
 import { money, signedClass } from '../format';
@@ -26,14 +27,6 @@ export function Startup({
   const grand = cats.reduce((s, c) => s + c.total, 0);
   const [editingUrlId, setEditingUrlId] = useState<string | null>(null);
   const [urlEditPos, setUrlEditPos] = useState<{ left: number; top: number } | null>(null);
-  const [expandedNotesId, setExpandedNotesId] = useState<string | null>(null);
-  const [hoverNotes, setHoverNotes] = useState<{
-    id: string;
-    text: string;
-    left: number;
-    top: number;
-    above: boolean;
-  } | null>(null);
   const [excTip, setExcTip] = useState<{ left: number; top: number } | null>(null);
 
   function patchItem(id: string, patch: Partial<StartupItem>) {
@@ -107,30 +100,6 @@ export function Startup({
   function onUrlContext(e: MouseEvent<HTMLButtonElement>, item: StartupItem) {
     e.preventDefault();
     startEditUrl(e.currentTarget, item.id);
-  }
-
-  function onNotesEnter(e: MouseEvent<HTMLElement>, item: StartupItem) {
-    if (!item.notes.trim() || expandedNotesId === item.id) {
-      setHoverNotes(null);
-      return;
-    }
-    const r = e.currentTarget.getBoundingClientRect();
-    const width = Math.min(360, window.innerWidth - 24);
-    let left = r.left;
-    let top = r.bottom + 8;
-    let above = false;
-    if (left + width > window.innerWidth - 12) left = window.innerWidth - width - 12;
-    if (left < 12) left = 12;
-    if (r.bottom + 160 > window.innerHeight && r.top > 140) {
-      above = true;
-      top = r.top - 8;
-    }
-    setHoverNotes({ id: item.id, text: item.notes, left, top, above });
-  }
-
-  function expandNotes(id: string) {
-    setExpandedNotesId(id);
-    setHoverNotes(null);
   }
 
   function onExcEnter(e: MouseEvent<HTMLElement>) {
@@ -220,15 +189,10 @@ export function Startup({
                       {group.items.map((i) => {
                     const missing = isUsedPriceMissing(i);
                     const hasUrl = i.url.trim() !== '';
-                    const notesOpen = expandedNotesId === i.id;
-                    const noteRows = Math.min(
-                      12,
-                      Math.max(3, i.notes.split('\n').length, Math.ceil((i.notes.length || 1) / 42)),
-                    );
                     return (
                       <tr
                         key={i.id}
-                        className={`${i.final ? 'line-final' : 'line-draft'}${notesOpen ? ' row-open' : ''}`}
+                        className={i.final ? 'line-final' : 'line-draft'}
                       >
                         <td>
                           <input className="cell" value={i.name} onChange={(e) => patchItem(i.id, { name: e.target.value })} />
@@ -295,33 +259,11 @@ export function Startup({
                             <Link2 size={16} />
                           </button>
                         </td>
-                        <td
-                          className="notes-cell"
-                          onMouseEnter={(e) => onNotesEnter(e, i)}
-                          onMouseLeave={() => setHoverNotes(null)}
-                          onClick={() => expandNotes(i.id)}
-                        >
-                          {notesOpen ? (
-                            <textarea
-                              className="cell notes-edit"
-                              value={i.notes}
-                              rows={noteRows}
-                              autoFocus
-                              onChange={(e) => patchItem(i.id, { notes: e.target.value })}
-                              onBlur={() => setExpandedNotesId((id) => (id === i.id ? null : id))}
-                              onClick={(e) => e.stopPropagation()}
-                              aria-label={`${i.name} notes`}
-                            />
-                          ) : (
-                            <input
-                              className="cell notes-compact"
-                              value={i.notes}
-                              onChange={(e) => patchItem(i.id, { notes: e.target.value })}
-                              onFocus={() => expandNotes(i.id)}
-                              aria-label={`${i.name} notes`}
-                            />
-                          )}
-                        </td>
+                        <NotesCell
+                          value={i.notes}
+                          onChange={(notes) => patchItem(i.id, { notes })}
+                          aria-label={`${i.name} notes`}
+                        />
                         <td className="exc-cell">
                           <input
                             type="checkbox"
@@ -417,18 +359,6 @@ export function Startup({
               placeholder="https://"
               aria-label="Edit link"
             />
-          </div>,
-          document.body,
-        )}
-
-      {hoverNotes && expandedNotesId !== hoverNotes.id && hoverNotes.text.trim() &&
-        createPortal(
-          <div
-            className={`notes-preview${hoverNotes.above ? ' above' : ''}`}
-            style={{ left: hoverNotes.left, top: hoverNotes.top }}
-            role="tooltip"
-          >
-            {hoverNotes.text}
           </div>,
           document.body,
         )}

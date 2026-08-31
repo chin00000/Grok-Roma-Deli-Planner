@@ -584,7 +584,8 @@ tr.cat-head.uncat td {
 }
 .notes-preview.above { transform: translateY(-100%); }
 
-tr.row-open td { vertical-align: top; }
+tr.row-open td,
+tr:has(textarea.notes-edit) td { vertical-align: top; }
 textarea.notes-edit {
   min-height: 72px;
   resize: vertical;
@@ -633,17 +634,10 @@ input.out-cost-input {
   margin: 0;
 }
 
-/* Notes: takes leftover width, shrinks on narrow screens */
+/* Notes: takes leftover width, shrinks on narrow screens. Same hover/expand as Startup (.notes-cell). */
 th.out-notes, td.out-notes {
   width: 100%;
   min-width: 6rem;
-}
-.out-notes-input {
-  display: block;
-  width: 100%;
-  min-width: 0;
-  max-width: none;
-  box-sizing: border-box;
 }
 
 .fold-head {
