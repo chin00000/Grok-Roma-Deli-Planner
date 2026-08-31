@@ -654,10 +654,12 @@ th.out-notes, td.out-notes {
   padding: 0 4px;
 }
 .roster-map {
+  --hour-px: 42px;
+  --map-w: 756px;
   display: grid;
-  grid-template-columns: 52px repeat(7, minmax(96px, 1fr));
-  grid-template-rows: 32px 576px;
-  min-width: 760px;
+  grid-template-columns: 56px var(--map-w);
+  grid-template-rows: 28px repeat(7, 58px);
+  min-width: calc(56px + var(--map-w));
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--paper);
@@ -668,6 +670,13 @@ th.out-notes, td.out-notes {
   border-bottom: 1px solid var(--line);
   background: var(--paper-2);
 }
+.roster-times-head {
+  position: relative;
+  height: 28px;
+  width: var(--map-w);
+  background: var(--paper-2);
+  border-bottom: 1px solid var(--line);
+}
 .roster-day-head {
   display: grid;
   place-items: center;
@@ -677,38 +686,35 @@ th.out-notes, td.out-notes {
   text-transform: uppercase;
   color: var(--ink-soft);
   background: var(--paper-2);
-  border-bottom: 1px solid var(--line);
-  border-left: 1px solid var(--line);
-}
-.roster-gutter {
-  position: relative;
-  height: 576px;
-  background: var(--paper-2);
+  border-top: 1px solid var(--line);
 }
 .roster-time {
   position: absolute;
-  right: 6px;
-  transform: translateY(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
   font-size: 11px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
+.roster-time.is-start { transform: translate(0, -50%); }
+.roster-time.is-end { transform: translate(0, -50%); }
 .roster-day {
   position: relative;
-  height: 576px;
-  border-left: 1px solid var(--line);
+  height: 58px;
+  width: var(--map-w);
+  border-top: 1px solid var(--line);
   background-image:
     repeating-linear-gradient(
-      to bottom,
+      to right,
       transparent 0,
-      transparent 17px,
-      color-mix(in srgb, var(--line) 45%, transparent) 17px,
-      color-mix(in srgb, var(--line) 45%, transparent) 18px,
-      transparent 18px,
-      transparent 35px,
-      var(--line) 35px,
-      var(--line) 36px
+      transparent calc(var(--hour-px) / 2 - 1px),
+      color-mix(in srgb, var(--line) 45%, transparent) calc(var(--hour-px) / 2 - 1px),
+      color-mix(in srgb, var(--line) 45%, transparent) calc(var(--hour-px) / 2),
+      transparent calc(var(--hour-px) / 2),
+      transparent calc(var(--hour-px) - 1px),
+      var(--line) calc(var(--hour-px) - 1px),
+      var(--line) var(--hour-px)
     );
   background-color: var(--paper);
 }
@@ -743,9 +749,9 @@ th.out-notes, td.out-notes {
 }
 .roster-block-inner {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 4px;
-  padding: 6px 6px 4px 8px;
+  padding: 4px 10px;
   height: 100%;
   min-height: 0;
   pointer-events: none;
@@ -788,11 +794,11 @@ th.out-notes, td.out-notes {
 .roster-x:hover { background: color-mix(in srgb, currentColor 28%, transparent); }
 .roster-handle {
   position: absolute;
-  left: 0;
-  right: 0;
-  height: 8px;
-  cursor: ns-resize;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  cursor: ew-resize;
   z-index: 2;
 }
-.roster-handle.top { top: 0; }
-.roster-handle.bottom { bottom: 0; }
+.roster-handle.left { left: 0; }
+.roster-handle.right { right: 0; }

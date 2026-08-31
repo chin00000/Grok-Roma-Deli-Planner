@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
 import type { Employee, RosterCell, Weekday } from '../types';
 import {
   DAYS,
@@ -11,10 +11,10 @@ import {
   snapHalf,
 } from '../types';
 
-const MAP_START = 6;
+const MAP_START = 4;
 const MAP_END = 22;
-const HOUR_PX = 36;
-const MAP_H = (MAP_END - MAP_START) * HOUR_PX;
+const HOUR_PX = 42;
+const MAP_W = (MAP_END - MAP_START) * HOUR_PX;
 const DEFAULT_DUR = 4;
 const MIN_DUR = 0.5;
 
@@ -37,6 +37,12 @@ function fmtClock(h: number): string {
   const hr = Math.floor(h);
   const min = Math.round((h - hr) * 60);
   return `${hr}:${String(min).padStart(2, '0')}`;
+}
+
+function fmtHourLabel(h: number): string {
+  if (h === MAP_START) return '4am';
+  if (h === MAP_END) return '10pm';
+  return String(h);
 }
 
 function clampRange(start: number, end: number): { start: number; end: number } {
@@ -102,8 +108,8 @@ function packColumns(
   return result;
 }
 
-function yToHour(clientY: number, bodyTop: number): number {
-  return snapHalf(MAP_START + (clientY - bodyTop) / HOUR_PX);
+function xToHour(clientX: number, bodyLeft: number): number {
+  return snapHalf(MAP_START + (clientX - bodyLeft) / HOUR_PX);
 }
 
 export function RosterMap({
@@ -149,12 +155,12 @@ export function RosterMap({
     return map;
   }, [timed]);
 
-  function dayFromX(clientX: number): Weekday | null {
+  function dayFromY(clientY: number): Weekday | null {
     for (const d of DAYS) {
       const el = dayRefs.current[d.id];
       if (!el) continue;
       const r = el.getBoundingClientRect();
-      if (clientX >= r.left && clientX < r.right) return d.id;
+      if (clientY >= r.top && clientY < r.bottom) return d.id;
     }
     return null;
   }
@@ -174,12 +180,12 @@ export function RosterMap({
     function onMove(e: PointerEvent) {
       const body = bodyRef.current;
       if (!body) return;
-      const hour = yToHour(e.clientY, body.getBoundingClientRect().top);
+      const hour = xToHour(e.clientX, body.getBoundingClientRect().left);
       const cell = rosterRef.current.find((c) => c.id === active.id);
       if (!cell) return;
       const t = inferTimes(cell);
       if (active.kind === 'move') {
-        const day = dayFromX(e.clientX) ?? cell.day;
+        const day = dayFromY(e.clientY) ?? cell.day;
         let start = hour - active.grabOffset;
         const dur = active.duration;
         start = snapHalf(start);
@@ -217,8 +223,8 @@ export function RosterMap({
     if (!empId || !byId.has(empId)) return;
     const body = bodyRef.current;
     if (!body) return;
-    const day = dayFromX(e.clientX) ?? fallbackDay;
-    let start = yToHour(e.clientY, body.getBoundingClientRect().top);
+    const day = dayFromY(e.clientY) ?? fallbackDay;
+    let start = xToHour(e.clientX, body.getBoundingClientRect().left);
     start = Math.min(Math.max(start, MAP_START), MAP_END - MIN_DUR);
     let end = start + DEFAULT_DUR;
     if (end > MAP_END) end = MAP_END;
@@ -260,32 +266,38 @@ export function RosterMap({
 
   return (
     <div className="roster-map-scroll">
-      <div className={`roster-map${drag ? ' is-dragging' : ''}`}>
+      <div
+        className={`roster-map${drag ? ' is-dragging' : ''}`}
+        style={{
+          ['--hour-px' as string]: `${HOUR_PX}px`,
+          ['--map-w' as string]: `${MAP_W}px`,
+        }}
+      >
         <div className="roster-corner" />
-        {DAYS.map((d) => (
-          <div key={d.id} className="roster-day-head">
-            {d.short}
-          </div>
-        ))}
-        <div className="roster-gutter" ref={bodyRef} style={{ height: MAP_H }}>
+        <div className="roster-times-head" ref={bodyRef} style={{ width: MAP_W }}>
           {hours.map((h) => (
             <div
               key={h}
-              className="roster-time"
-              style={{ top: (h - MAP_START) * HOUR_PX }}
+              className={`roster-time${h === MAP_START ? ' is-start' : ''}${h === MAP_END ? ' is-end' : ''}`}
+              style={
+                h === MAP_END
+                  ? { right: 0 }
+                  : { left: (h - MAP_START) * HOUR_PX }
+              }
             >
-              {fmtClock(h)}
+              {fmtHourLabel(h)}
             </div>
           ))}
         </div>
         {DAYS.map((d) => {
-            const pack = packByDay.get(d.id);
-            const dayCells = timed.filter((t) => t.cell.day === d.id);
-            return (
+          const pack = packByDay.get(d.id);
+          const dayCells = timed.filter((t) => t.cell.day === d.id);
+          return (
+            <Fragment key={d.id}>
+              <div className="roster-day-head">{d.short}</div>
               <div
-                key={d.id}
                 className="roster-day"
-                style={{ height: MAP_H }}
+                style={{ width: MAP_W }}
                 data-day={d.id}
                 ref={(el) => {
                   dayRefs.current[d.id] = el;
@@ -301,20 +313,20 @@ export function RosterMap({
                   if (!emp) return null;
                   const dept = deptOf(t.cell.dayPart);
                   const layout = pack?.get(t.cell.id) ?? { col: 0, cols: 1 };
-                  const top = (t.startHour - MAP_START) * HOUR_PX;
-                  const height = Math.max((t.endHour - t.startHour) * HOUR_PX, 16);
-                  const widthPct = 100 / layout.cols;
-                  const leftPct = layout.col * widthPct;
+                  const left = (t.startHour - MAP_START) * HOUR_PX;
+                  const width = Math.max((t.endHour - t.startHour) * HOUR_PX, 16);
+                  const heightPct = 100 / layout.cols;
+                  const topPct = layout.col * heightPct;
                   const deptLabel = dept === 'deli' ? 'Deli' : dept === 'catering' ? 'Catering' : 'Wine';
                   return (
                     <div
                       key={t.cell.id}
                       className={`roster-block dept-${dept}${drag?.id === t.cell.id ? ' dragging' : ''}`}
                       style={{
-                        top,
-                        height,
-                        left: `calc(${leftPct}% + 3px)`,
-                        width: `calc(${widthPct}% - 6px)`,
+                        left,
+                        width,
+                        top: `calc(${topPct}% + 2px)`,
+                        height: `calc(${heightPct}% - 4px)`,
                       }}
                       title={`${emp.name} · ${fmtClock(t.startHour)}–${fmtClock(t.endHour)} · ${deptLabel}`}
                       onDragOver={(e) => {
@@ -329,7 +341,7 @@ export function RosterMap({
                         e.preventDefault();
                         const body = bodyRef.current;
                         if (!body) return;
-                        const hour = yToHour(e.clientY, body.getBoundingClientRect().top);
+                        const hour = xToHour(e.clientX, body.getBoundingClientRect().left);
                         setDrag({
                           kind: 'move',
                           id: t.cell.id,
@@ -339,7 +351,7 @@ export function RosterMap({
                       }}
                     >
                       <div
-                        className="roster-handle top"
+                        className="roster-handle left"
                         onPointerDown={(e) => {
                           if (e.button !== 0) return;
                           e.preventDefault();
@@ -377,7 +389,7 @@ export function RosterMap({
                         </button>
                       </div>
                       <div
-                        className="roster-handle bottom"
+                        className="roster-handle right"
                         onPointerDown={(e) => {
                           if (e.button !== 0) return;
                           e.preventDefault();
@@ -389,8 +401,9 @@ export function RosterMap({
                   );
                 })}
               </div>
-            );
-          })}
+            </Fragment>
+          );
+        })}
       </div>
     </div>
   );
